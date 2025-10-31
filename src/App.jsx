@@ -8,6 +8,7 @@ import { TransactionProvider } from "./context/TransactionContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { Login } from "./pages/Login";
+import JournalPage from "./pages/JournalPage";
 import BlobCursor from "./components/BlobCursor";
 import { Chatbot } from "./components/Chatbot";
 
@@ -55,6 +56,14 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <History />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/journal"
+                      element={
+                        <ProtectedRoute>
+                          <JournalPage />
                         </ProtectedRoute>
                       }
                     />

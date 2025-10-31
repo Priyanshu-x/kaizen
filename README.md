@@ -1,3 +1,5 @@
+Project Link: https://income-tracker-p8cohl912-clgbca01-gmailcoms-projects.vercel.app/
+
 # Income Tracker Application
 
 A simple and intuitive web application to track your income and expenses, providing a clear overview of your financial health.
@@ -10,6 +12,8 @@ A simple and intuitive web application to track your income and expenses, provid
 *   **Analytics:** Visualize your income and spending patterns with charts and graphs.
 *   **User Authentication:** Secure login and registration for personalized tracking.
 *   **Theme Switching:** Customize the application's appearance with different themes.
+*   **Journal Page:** Record and manage daily financial notes and entries.
+*   **Trade Linking:** Link transactions to specific trades for better tracking.
 
 ## Technologies Used
 
@@ -44,9 +48,10 @@ To get a local copy up and running, follow these simple steps.
     ```bash
     npm install
     ```
-4.  Create a `.env` file in the root directory and add your environment variables (e.g., API keys, database connection strings).
+4.  Create a `.env` file in the root directory and add your environment variables (e.g., API keys, database connection strings, API endpoint).
     ```
     VITE_SOME_KEY=your_value
+    VITE_API_ENDPOINT=http://localhost:5000/api
     ```
 5.  Run the development server
     ```bash
@@ -71,12 +76,4 @@ Don't forget to give the project a star! Thanks again!
 4.  Push to the Branch (`git push origin feature/AmazingFeature`)
 5.  Open a Pull Request
 
-## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## Contact
-
-Your Name - your_email@example.com
-
-Project Link: [https://github.com/your_username/income-tracker](https://github.com/your_username/income-tracker)

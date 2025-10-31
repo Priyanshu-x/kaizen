@@ -40,3 +40,14 @@
 .read-the-docs {
   color: #888;
 }
+
+.journal-content img {
+  max-width: 100%;
+  max-height: 200px; /* Adjust this value as needed */
+  height: auto;
+  display: block; /* Remove extra space below image */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

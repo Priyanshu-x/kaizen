@@ -27,3 +27,49 @@ body {
   background: rgba(0, 0, 0, 0.2); /* Slightly more opaque for dark mode */
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* ReactQuill Dark Mode Fixes */
+.dark .ql-toolbar.ql-snow .ql-stroke {
+  stroke: #cbd5e0; /* Light gray for icons in dark mode */
+}
+
+.dark .ql-toolbar.ql-snow .ql-fill {
+  fill: #cbd5e0; /* Light gray for filled icons in dark mode */
+}
+
+.dark .ql-toolbar.ql-snow .ql-picker-label {
+  color: #cbd5e0; /* Text color for dropdown labels */
+}
+
+.dark .ql-toolbar.ql-snow .ql-picker-options {
+  background-color: #4a5568; /* Darker background for dropdown options */
+  color: #cbd5e0;
+}
+
+.dark .ql-snow .ql-tooltip {
+  background-color: #4a5568;
+  color: #cbd5e0;
+  border: 1px solid #4a5568;
+}
+
+.dark .ql-snow .ql-tooltip a {
+  color: #90cdf4; /* Link color in tooltip */
+}
+
+.dark .ql-container.ql-snow {
+  border-color: #4a5568; /* Border color for the editor container */
+}
+
+.dark .ql-editor {
+  color: #cbd5e0; /* Text color inside the editor */
+}
+
+.journal-content img {
+  max-width: 100%;
+  height: auto;
+  display: block; /* Remove extra space below image */
+  margin-top: 1rem; /* Add some space above the image */
+  margin-bottom: 1rem; /* Add some space below the image */
+  border-radius: 0.5rem; /* Slightly rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}

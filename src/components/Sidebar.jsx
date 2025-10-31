@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Wallet, BarChart, History } from "lucide-react";
+import { Wallet, BarChart, History, BookOpen } from "lucide-react";
 
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,6 +9,7 @@ export function Sidebar() {
     { path: "/", icon: Wallet, label: "Dashboard" },
     { path: "/analytics", icon: BarChart, label: "Analytics" },
     { path: "/history", icon: History, label: "History" },
+    { path: "/journal", icon: BookOpen, label: "Journal" },
   ];
 
   return (

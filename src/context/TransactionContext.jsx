@@ -42,7 +42,7 @@ export function TransactionProvider({ children }) {
         return res.json();
       })
       .then((newTransaction) => {
-        setTransactions((prev) => [...prev, { ...newTransaction, amount: Number(newTransaction.amount) || 0, description: newTransaction.description || data.description || "" }]);
+        setTransactions((prev) => [...prev, { ...newTransaction, amount: Number(newTransaction.amount) || 0, description: newTransaction.description || data.description || "", instrument: newTransaction.instrument || data.instrument || "" }]);
       })
       .catch((err) => console.error("Error adding transaction:", err));
   };
@@ -60,7 +60,7 @@ export function TransactionProvider({ children }) {
       })
       .then((updatedTransaction) => {
         setTransactions((prev) =>
-          prev.map((t) => (t._id === updatedTransaction._id ? { ...updatedTransaction, amount: Number(updatedTransaction.amount) || 0, description: updatedTransaction.description || data.description || "" } : t))
+          prev.map((t) => (t._id === updatedTransaction._id ? { ...updatedTransaction, amount: Number(updatedTransaction.amount) || 0, description: updatedTransaction.description || data.description || "", instrument: updatedTransaction.instrument || data.instrument || "" } : t))
         );
       })
       .catch((err) => console.error("Error updating transaction:", err));
