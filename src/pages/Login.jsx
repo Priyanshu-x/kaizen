@@ -19,7 +19,7 @@ export function Login() {
     if (login(username, password)) {
       navigate(from, { replace: true });
     } else {
-      setError("Invalid username or password. Try 'user' and 'pass'.");
+      setError("Invalid username or password. Please try again.");
     }
   };
 

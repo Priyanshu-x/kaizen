@@ -1,4 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, ResponsiveContainer } from "recharts";
+import { MonthlyNetBalanceChart } from "../components/MonthlyNetBalanceChart";
+import { getMonthlyNetBalances } from "../utils/transactionUtils";
 import { useTransaction } from "../context/TransactionContext";
 import { useMemo } from "react";
 import { useTheme } from "../context/ThemeContext";
@@ -65,6 +67,8 @@ export function Analytics() {
       .sort((a, b) => new Date(a.monthYear.split(" ")[1], ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].indexOf(a.monthYear.split(" ")[0])) - new Date(b.monthYear.split(" ")[1], ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].indexOf(b.monthYear.split(" ")[0])));
   }, [transactions]);
 
+  const monthlyNetBalances = getMonthlyNetBalances(transactions);
+ 
   // Empty state
   if (transactions.length === 0 || !transactions.every((t) => t.date && t.amount && t.category && t.type)) {
     return (
@@ -74,7 +78,7 @@ export function Analytics() {
       </div>
     );
   }
-
+ 
   return (
     <div className="p-6 dark:bg-gray-900 dark:text-white min-h-screen">
       <h2 className="text-2xl font-bold mb-6 dark:text-white">Analytics</h2>
@@ -94,7 +98,7 @@ export function Analytics() {
           </BarChart>
         </ResponsiveContainer>
       </div>
-
+ 
       <div className="mb-8">
         <h3 className="text-xl font-semibold mb-4 dark:text-white">Expenses by Category</h3>
         <ResponsiveContainer width="100%" height={300}>
@@ -111,8 +115,8 @@ export function Analytics() {
           </BarChart>
         </ResponsiveContainer>
       </div>
-
-      <div>
+ 
+      <div className="mb-8">
         <h3 className="text-xl font-semibold mb-4 dark:text-white">Profit & Loss Over Time</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={pnlTimeData}>
@@ -128,6 +132,10 @@ export function Analytics() {
             <Bar dataKey="expense" stackId="a" fill="#EF5350" /> {/* Red for expense */}
           </BarChart>
         </ResponsiveContainer>
+      </div>
+
+      <div className="mt-6">
+        <MonthlyNetBalanceChart data={monthlyNetBalances} />
       </div>
     </div>
   );

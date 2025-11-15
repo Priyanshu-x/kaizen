@@ -1,4 +1,4 @@
-Project Link: https://income-tracker-p8cohl912-clgbca01-gmailcoms-projects.vercel.app/
+Project Link: https://income-tracker-prika-x.vercel.app/
 
 # Income Tracker Application
 
@@ -13,7 +13,10 @@ A simple and intuitive web application to track your income and expenses, provid
 *   **User Authentication:** Secure login and registration for personalized tracking.
 *   **Theme Switching:** Customize the application's appearance with different themes.
 *   **Journal Page:** Record and manage daily financial notes and entries.
-*   **Trade Linking:** Link transactions to specific trades for better tracking.
+
+## Bug Fixes
+
+*   **Alias Problem Solved:** Resolved issues related to alias handling.
 
 ## Technologies Used
 
