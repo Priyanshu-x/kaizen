@@ -15,7 +15,6 @@ import { Chatbot } from "./components/Chatbot";
 function App() {
   const ProtectedRoute = ({ children }) => {
     const { user } = useAuth();
-    console.log("ProtectedRoute - User:", user); // Debug log
     if (!user) {
       return <Navigate to="/login" replace />;
     }

@@ -9,7 +9,7 @@ import AddExpenseForm from "./AddExpenseForm"; // Import AddExpenseForm
 
 export function Navbar() {
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth(); // Destructure user from useAuth
   const { transactions, addTransaction } = useTransaction(); // Get transactions and addTransaction
   const [isAddIncomeFormOpen, setIsAddIncomeFormOpen] = useState(false);
   const [isAddExpenseFormOpen, setIsAddExpenseFormOpen] = useState(false); // State for expense form
@@ -73,49 +73,53 @@ export function Navbar() {
           {/* You can add a logo or title here if needed */}
         </div>
 
-        {/* Center: Action Buttons */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          <button
-            onClick={handleAddIncomeClick}
-            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md hover:from-blue-600 hover:to-purple-700 transition-all duration-200"
-          >
-            Add Income
-          </button>
-          <button
-            onClick={handleAddExpenseClick} // Add expense button
-            className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-md hover:from-red-600 hover:to-red-800 transition-all duration-200"
-          >
-            Add Expense
-          </button>
-          <button
-            onClick={exportTransactions}
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-200"
-          >
-            Export CSV
-          </button>
-          <label className="px-4 py-2 bg-yellow-500 text-white rounded-md cursor-pointer hover:bg-yellow-600 transition-all duration-200">
-            Import CSV
-            <input
-              type="file"
-              accept=".csv"
-              onChange={importTransactions}
-              className="hidden"
-            />
-          </label>
-          <button
-            onClick={logout}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all duration-200"
-          >
-            Logout
-          </button>
-        </div>
+        {/* Center: Action Buttons (conditionally rendered) */}
+        {user && (
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <button
+              onClick={handleAddIncomeClick}
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md hover:from-blue-600 hover:to-purple-700 transition-all duration-200"
+            >
+              Add Income
+            </button>
+            <button
+              onClick={handleAddExpenseClick} // Add expense button
+              className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-md hover:from-red-600 hover:to-red-800 transition-all duration-200"
+            >
+              Add Expense
+            </button>
+            <button
+              onClick={exportTransactions}
+              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-200"
+            >
+              Export CSV
+            </button>
+            <label className="px-4 py-2 bg-yellow-500 text-white rounded-md cursor-pointer hover:bg-yellow-600 transition-all duration-200">
+              Import CSV
+              <input
+                type="file"
+                accept=".csv"
+                onChange={importTransactions}
+                className="hidden"
+              />
+            </label>
+            <button
+              onClick={logout}
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all duration-200"
+            >
+              Logout
+            </button>
+          </div>
+        )}
 
         {/* Right side: User Profile and Dark Mode Toggle */}
         <div className="flex items-center space-x-2 sm:space-x-4">
-          <div className="flex items-center space-x-2">
-            <UserCircle className="h-8 w-8 text-gray-600 dark:text-gray-300" />
-            <span className="text-gray-800 dark:text-gray-100 hidden md:block">Priyanshu</span>
-          </div>
+          {user && (
+            <div className="flex items-center space-x-2">
+              <UserCircle className="h-8 w-8 text-gray-600 dark:text-gray-300" />
+              <span className="text-gray-800 dark:text-gray-100 hidden md:block">Priyanshu</span>
+            </div>
+          )}
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
