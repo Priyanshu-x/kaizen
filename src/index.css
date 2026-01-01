@@ -2,74 +2,152 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary: 221 83% 48%; /* Default primary color (blue) */
-  --primary-foreground: 210 20% 98%;
+@layer base {
+  :root {
+    --background: 0 0% 100%;       /* White */
+    --foreground: 0 0% 0%;         /* Black */
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    
+    --primary: 0 0% 5%;            /* Near Black */
+    --primary-foreground: 0 0% 98%;/* Off-white */
+    
+    --secondary: 0 0% 90%;         /* Light Gray */
+    --secondary-foreground: 0 0% 5%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;  /* Mid Gray */
+    
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+    
+    --destructive: 0 0% 30%;       /* Dark Gray */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 80%;
+    --input: 0 0% 80%;
+    --ring: 0 0% 0%;               
+
+    --radius: 0.75rem;
+
+    /* Chart Colors - Grayscale Gradient */
+    --chart-1: 0 0% 20%;           
+    --chart-2: 0 0% 40%;           
+    --chart-3: 0 0% 60%;           
+    --chart-4: 0 0% 80%;           
+    --chart-5: 0 0% 90%;           
+  }
+
+  .dark {
+    --background: 0 0% 5%;         /* Near Black */
+    --foreground: 0 0% 98%;        /* Near White */
+    
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 0 0% 98%;           /* Near White */
+    --primary-foreground: 0 0% 5%; /* Dark Text */
+    
+    --secondary: 0 0% 15%;         /* Dark Gray */
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 0% 40%;       
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 80%;
+
+    /* Chart Colors - Grayscale Gradient (Inverted) */
+    --chart-1: 0 0% 90%;          
+    --chart-2: 0 0% 70%;           
+    --chart-3: 0 0% 50%;           
+    --chart-4: 0 0% 30%;           
+    --chart-5: 0 0% 15%;           
+  }
 }
 
-.dark {
-  --primary: 217 33% 12%; /* Darker primary color for dark mode (almost black) */
-  --primary-foreground: 210 20% 98%;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground tracking-tight font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-medium tracking-tight;
+  }
 }
 
-/* Apply dark mode background color to the body */
-body {
-  @apply bg-white dark:bg-dark-background text-gray-900 dark:text-dark-text;
-}
+@layer utilities {
+  .glass-card {
+    @apply bg-white/10 dark:bg-zinc-900/40 backdrop-blur-xl border border-black/10 dark:border-white/10 shadow-lg;
+  }
+  
+  .glass-header {
+    @apply bg-white/80 dark:bg-black/80 backdrop-blur-lg border-b border-black/5 dark:border-white/5;
+  }
+  
+  .glass-sidebar {
+    @apply bg-white/5 dark:bg-black/40 backdrop-blur-xl border-r border-black/5 dark:border-white/5;
+  }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.dark .glass-card {
-  background: rgba(0, 0, 0, 0.2); /* Slightly more opaque for dark mode */
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Modified to be monochrome gradient */
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 dark:from-white dark:via-gray-400 dark:to-white;
+  }
 }
 
 /* ReactQuill Dark Mode Fixes */
 .dark .ql-toolbar.ql-snow .ql-stroke {
-  stroke: #cbd5e0; /* Light gray for icons in dark mode */
+  stroke: #cbd5e0;
 }
-
 .dark .ql-toolbar.ql-snow .ql-fill {
-  fill: #cbd5e0; /* Light gray for filled icons in dark mode */
+  fill: #cbd5e0;
 }
-
 .dark .ql-toolbar.ql-snow .ql-picker-label {
-  color: #cbd5e0; /* Text color for dropdown labels */
+  color: #cbd5e0;
 }
-
 .dark .ql-toolbar.ql-snow .ql-picker-options {
-  background-color: #4a5568; /* Darker background for dropdown options */
+  background-color: #1e293b;
   color: #cbd5e0;
 }
-
 .dark .ql-snow .ql-tooltip {
-  background-color: #4a5568;
+  background-color: #1e293b;
   color: #cbd5e0;
-  border: 1px solid #4a5568;
+  border: 1px solid #334155;
 }
-
-.dark .ql-snow .ql-tooltip a {
-  color: #90cdf4; /* Link color in tooltip */
-}
-
-.dark .ql-container.ql-snow {
-  border-color: #4a5568; /* Border color for the editor container */
-}
-
 .dark .ql-editor {
-  color: #cbd5e0; /* Text color inside the editor */
+  color: #cbd5e0;
 }
 
 .journal-content img {
-  max-width: 100%;
-  height: auto;
-  display: block; /* Remove extra space below image */
-  margin-top: 1rem; /* Add some space above the image */
-  margin-bottom: 1rem; /* Add some space below the image */
-  border-radius: 0.5rem; /* Slightly rounded corners */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  @apply rounded-xl shadow-lg my-4 max-w-full block;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50 transition-colors;
 }

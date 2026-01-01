@@ -26,50 +26,52 @@ function App() {
       <TransactionProvider>
         <ThemeProvider>
           <Router>
-            <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary/20 selection:text-primary">
               <BlobCursor />
-              <Navbar />
-              <div className="flex flex-1">
-                <Sidebar />
-                <main className="flex-1 p-6">
-                  <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route
-                      path="/"
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/analytics"
-                      element={
-                        <ProtectedRoute>
-                          <Analytics />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/history"
-                      element={
-                        <ProtectedRoute>
-                          <History />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/journal"
-                      element={
-                        <ProtectedRoute>
-                          <JournalPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                  </Routes>
+              <Sidebar />
+              <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+                <Navbar />
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar scroll-smooth">
+                  <div className="max-w-7xl mx-auto space-y-6">
+                    <Routes>
+                      <Route path="/login" element={<Login />} />
+                      <Route
+                        path="/"
+                        element={
+                          <ProtectedRoute>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/analytics"
+                        element={
+                          <ProtectedRoute>
+                            <Analytics />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/history"
+                        element={
+                          <ProtectedRoute>
+                            <History />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/journal"
+                        element={
+                          <ProtectedRoute>
+                            <JournalPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                    </Routes>
+                  </div>
                 </main>
+                <Chatbot />
               </div>
-              <Chatbot />
             </div>
           </Router>
         </ThemeProvider>

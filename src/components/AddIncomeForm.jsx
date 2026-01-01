@@ -12,7 +12,7 @@ export function AddIncomeForm({ onAdd, onClose }) {
   });
   const [error, setError] = useState("");
 
-  const categories = ["Trading","Freelancing", "Salary", "Gigs", "Other"];
+  const categories = ["Trading", "Freelancing", "Salary", "Gigs", "Other"];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,19 +75,7 @@ export function AddIncomeForm({ onAdd, onClose }) {
             className="mt-1 p-2 w-full border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="mt-1 p-2 w-full border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-        </div>
+        {/* Category selection removed, defaults to Trading */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
           <textarea

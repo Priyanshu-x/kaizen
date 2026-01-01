@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTransaction } from '../context/TransactionContext';
-import { useTheme } from '../context/ThemeContext';
+import { MessageSquare, X, Send } from 'lucide-react';
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const { transactions, loading, error } = useTransaction();
-  const { isDarkMode } = useTheme();
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -38,15 +37,18 @@ export function Chatbot() {
     if (transactionsData.length === 0) return "You don't have any transactions yet. Add some to get insights!";
 
     // Basic analysis functions
-    const getTotalIncome = () => transactionsData.reduce((sum, t) => sum + Number(t.amount), 0);
-    const getHighestIncome = () => Math.max(...transactionsData.map(t => Number(t.amount)));
-    const getLowestIncome = () => Math.min(...transactionsData.map(t => Number(t.amount)));
-    const getAverageIncome = () => getTotalIncome() / transactionsData.length;
+    const getTotalIncome = () => transactionsData.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
+    const getHighestIncome = () => Math.max(...transactionsData.filter(t => t.type === 'income').map(t => Number(t.amount)));
+    const getLowestIncome = () => Math.min(...transactionsData.filter(t => t.type === 'income').map(t => Number(t.amount)));
+    const getAverageIncome = () => {
+      const incomes = transactionsData.filter(t => t.type === 'income');
+      return incomes.length ? getTotalIncome() / incomes.length : 0;
+    };
     const getIncomeByCategory = () => {
       const categoryMap = {};
       transactionsData.forEach(t => {
         const amount = Number(t.amount);
-        if (!isNaN(amount) && amount > 0) {
+        if (!isNaN(amount) && t.type === 'income') {
           const category = t.category || "Other";
           categoryMap[category] = (categoryMap[category] || 0) + amount;
         }
@@ -55,7 +57,7 @@ export function Chatbot() {
     };
 
     if (lowerQuery.includes('hello') || lowerQuery.includes('hi')) {
-      return "Hello! How can I help you with your income data today?";
+      return "Hello! How can I help you with your financial data today?";
     } else if (lowerQuery.includes('total income')) {
       return `Your total recorded income is ₹${getTotalIncome().toFixed(2)}.`;
     } else if (lowerQuery.includes('highest income')) {
@@ -67,74 +69,87 @@ export function Chatbot() {
     } else if (lowerQuery.includes('income by category')) {
       const categories = getIncomeByCategory();
       return `Here's your income by category: ${categories}.`;
-    } else if (lowerQuery.includes('all transactions')) {
-      const transactionList = transactionsData.map(t => `${t.description} (₹${Number(t.amount).toFixed(2)}) on ${new Date(t.date).toLocaleDateString()}`).join('; ');
-      return `Here are all your transactions: ${transactionList}.`;
     } else if (lowerQuery.includes('thank you') || lowerQuery.includes('thanks')) {
       return "You're welcome! Let me know if you have more questions.";
     } else {
-      return "I can help you with questions about your total income, highest/lowest/average income, income by category, or list all transactions. What would you like to know?";
+      return "I can help with: total income, highest/lowest/average income, or income by category. Just ask!";
     }
   };
-
-  const chatContainerClasses = `fixed bottom-4 right-4 w-80 h-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg flex flex-col transition-all duration-300 z-50 ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`;
-  const chatHeaderClasses = `p-4 bg-indigo-600 dark:bg-indigo-800 text-white rounded-t-lg flex justify-between items-center`;
-  const messageContainerClasses = `flex-1 p-4 overflow-y-auto ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-b-lg`;
-  const messageBubbleClasses = (sender) => `mb-2 p-2 rounded-lg max-w-[80%] ${sender === 'user' ? 'bg-indigo-500 text-white self-end ml-auto' : `${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} ${isDarkMode ? 'text-white' : 'text-gray-900'} self-start mr-auto`}`;
-  const inputContainerClasses = `p-4 border-t ${isDarkMode ? 'border-gray-600' : 'border-gray-200'} flex`;
-  const inputFieldClasses = `flex-1 p-2 rounded-l-lg border ${isDarkMode ? 'bg-gray-900 border-gray-600 text-white' : 'border-gray-300'} focus:outline-none`;
-  const sendButtonClasses = `p-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 dark:bg-indigo-800 dark:hover:bg-indigo-900 transition-colors`;
-  const toggleButtonClasses = `fixed bottom-4 right-4 p-3 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 dark:bg-indigo-800 dark:hover:bg-indigo-900 transition-colors z-50`;
 
   return (
     <>
       {isOpen && (
-        <div className={chatContainerClasses}>
-          <div className={chatHeaderClasses}>
-            <h3 className="text-lg font-semibold">Income Bot</h3>
-            <button onClick={() => setIsOpen(false)} className="text-white hover:text-gray-200">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+        <div className="fixed bottom-20 right-4 w-96 h-[500px] glass-card rounded-2xl flex flex-col shadow-2xl z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
+          <div className="p-4 bg-primary/10 border-b border-border/50 flex justify-between items-center rounded-t-2xl backdrop-blur-md">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-primary/20 rounded-full text-primary">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground">Assistant</h3>
+                <p className="text-xs text-muted-foreground">Ask about your finances</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-1 hover:bg-secondary rounded-full transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-5 w-5" />
             </button>
           </div>
-          <div className={messageContainerClasses}>
+
+          <div className="flex-1 p-4 overflow-y-auto space-y-4 custom-scrollbar">
+            {messages.length === 0 && (
+              <div className="text-center text-sm text-muted-foreground mt-10">
+                <p>👋 Hi! Im your personal finance assistant.</p>
+                <p className="mt-2">Try asking: "What is my total income?"</p>
+              </div>
+            )}
             {messages.map((msg, index) => (
-              <div key={index} className={messageBubbleClasses(msg.sender)}>
-                {msg.text}
+              <div
+                key={index}
+                className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`
+                  max-w-[80%] p-3 rounded-2xl text-sm font-medium
+                  ${msg.sender === 'user'
+                    ? 'bg-primary text-primary-foreground rounded-br-none shadow-lg shadow-primary/20'
+                    : 'bg-secondary text-secondary-foreground rounded-bl-none'}
+                `}>
+                  {msg.text}
+                </div>
               </div>
             ))}
             <div ref={messagesEndRef} />
           </div>
-          <div className={inputContainerClasses}>
-            <input
-              type="text"
-              className={inputFieldClasses}
-              placeholder="Ask about your income..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleSendMessage();
-                }
-              }}
-            />
-            <button onClick={handleSendMessage} className={sendButtonClasses}>
-              Send
-            </button>
+
+          <div className="p-4 border-t border-border/50 bg-secondary/30 rounded-b-2xl">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="flex-1 px-4 py-2 rounded-xl bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm transition-all"
+                placeholder="Type a message..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              />
+              <button
+                onClick={handleSendMessage}
+                className="p-2 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+              >
+                <Send className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
       )}
-      <button onClick={() => setIsOpen(!isOpen)} className={toggleButtonClasses}>
-        {isOpen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
-        )}
+
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`fixed bottom-4 right-4 p-4 rounded-full shadow-2xl transition-all z-50 hover:scale-110 active:scale-95 ${isOpen ? 'bg-secondary text-foreground' : 'bg-primary text-primary-foreground shadow-primary/30'
+          }`}
+      >
+        {isOpen ? <X className="h-6 w-6" /> : <MessageSquare className="h-6 w-6" />}
       </button>
     </>
   );

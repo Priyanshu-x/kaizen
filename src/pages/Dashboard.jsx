@@ -1,62 +1,136 @@
+import { motion } from "framer-motion";
 import { StatsCard } from "../components/StatsCard";
 import { TransactionTable } from "../components/TransactionTable";
+import { IncomeChart } from "../components/IncomeChart";
+import { MonthlyTrendChart } from "../components/MonthlyTrendchart";
 import { useTransaction } from "../context/TransactionContext";
-import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { getMonthlyNetBalances } from "../utils/transactionUtils";
+import { Wallet, TrendingUp, TrendingDown, DollarSign, Activity } from "lucide-react";
 
 export function Dashboard() {
-  const { transactions, updateTransaction, deleteTransaction, loading, error } = useTransaction();
-  const { logout } = useAuth();
+  const { transactions, loading, error } = useTransaction();
+  const { user } = useAuth();
 
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
   const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0);
-  const netBalance = totalIncome + totalExpenses;
-  const currentMonth = new Date().toLocaleString('default', { month: 'short' });
-  const thisMonthIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => {
-    const transactionMonth = new Date(t.date).toLocaleString('default', { month: 'short' });
-    return transactionMonth === currentMonth ? sum + Number(t.amount) : sum;
-  }, 0);
-  const thisMonthExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => {
-    const transactionMonth = new Date(t.date).toLocaleString('default', { month: 'short' });
-    return transactionMonth === currentMonth ? sum + Number(t.amount) : sum;
-  }, 0);
+  const netBalance = totalIncome - Math.abs(totalExpenses); // distinct expenses are usually negative or positive depending on storage, assuming stored as positive based on previous code.
+  // Actually previous code: totalExpenses = ... reduce((sum, t) => sum + Number(t.amount), 0).
+  // Expenses might be stored as positive numbers with type='expense'.
 
-  const thisMonthNetBalance = thisMonthIncome + thisMonthExpenses;
+  const currentMonth = new Date().toLocaleString('default', { month: 'short' });
+
+  // Calculate this month's stats
+  const thisMonthTransactions = transactions.filter(t =>
+    new Date(t.date).toLocaleString('default', { month: 'short' }) === currentMonth
+  );
+
+  const thisMonthIncome = thisMonthTransactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  const thisMonthExpenses = thisMonthTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const stats = [
-    { title: "Total Income", value: totalIncome, trend: 5.2, color: "bg-chart-1" },
-    { title: "Total Expenses", value: Math.abs(totalExpenses), trend: -3.1, color: "bg-red-500" },
-    { title: "Net Balance", value: netBalance, trend: 0, color: "bg-blue-500" },
-    { title: "This Month Income", value: thisMonthIncome, trend: -1.8, color: "bg-chart-2" },
-    { title: "This Month Expenses", value: thisMonthExpenses, trend: 4.5, color: "bg-red-700" },
-    { title: "This Month Net Balance", value: thisMonthNetBalance, trend: 0, color: "bg-blue-700" },
-    { title: "Top Source", value: "Trading", trend: 8.3, color: "bg-chart-3" },
+    {
+      title: "Total Balance",
+      value: netBalance,
+      trend: 12.5,
+      icon: Wallet
+    },
+    {
+      title: "Monthly Income",
+      value: thisMonthIncome,
+      trend: 8.2,
+      icon: TrendingUp
+    },
+    {
+      title: "Monthly Expenses",
+      value: thisMonthExpenses,
+      trend: -5.4,
+      icon: TrendingDown
+    },
+    {
+      title: "Monthly Savings",
+      value: thisMonthIncome + thisMonthExpenses,
+      trend: 2.1,
+      icon: DollarSign
+    },
   ];
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { y: 20, opacity: 0 },
+    show: { y: 0, opacity: 1 }
+  };
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
-      <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">Dashboard</h2>
-      {loading && <p className="text-yellow-500">Loading transactions...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+    <div className="min-h-screen pb-20">
+      <div className="flex flex-col gap-2 mb-8">
+        <h1 className="text-3xl font-bold font-heading w-fit">
+          Dashboard
+        </h1>
+        <p className="text-muted-foreground">
+          Welcome back, {user?.name || "User"}. Here's your financial overview.
+        </p>
+      </div>
+
+      {loading && (
+        <div className="flex items-center justify-center p-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
+
+      {error && (
+        <div className="p-4 bg-destructive/10 text-destructive rounded-xl mb-6">
+          {error}
+        </div>
+      )}
+
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="space-y-6"
       >
-        {stats.map((stat, index) => (
-          <StatsCard key={index} title={stat.title} value={stat.value} trend={stat.trend} color={stat.color} />
-        ))}
-      </motion.div>
-      <motion.div
-        className="mt-6"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-      >
-        <TransactionTable />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <motion.div key={index} variants={item}>
+              <StatsCard
+                title={stat.title}
+                value={stat.value}
+                trend={stat.trend}
+                icon={stat.icon}
+              />
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <motion.div variants={item}>
+            <IncomeChart entries={transactions.filter(t => t.type === 'income')} />
+          </motion.div>
+          <motion.div variants={item}>
+            <MonthlyTrendChart entries={transactions} />
+          </motion.div>
+        </div>
+
+        {/* Transactions Section */}
+        <motion.div variants={item}>
+          <TransactionTable />
+        </motion.div>
       </motion.div>
     </div>
   );

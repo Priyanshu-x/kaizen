@@ -8,12 +8,12 @@ const AddExpenseForm = ({ onClose }) => {
   const [date, setDate] = useState('');
   const [source, setSource] = useState('');
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('Trading');
   const [description, setDescription] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!date || !source || !amount || !category || !description) {
+    if (!date || !source || !amount || !description) {
       alert('Please fill in all fields');
       return;
     }
@@ -23,7 +23,7 @@ const AddExpenseForm = ({ onClose }) => {
       date,
       source,
       amount: -Math.abs(parseFloat(amount)), // Ensure amount is negative
-      category,
+      category: 'Trading', // Hardcode just in case
       description,
       type: 'expense',
     };
@@ -72,25 +72,7 @@ const AddExpenseForm = ({ onClose }) => {
               required
             />
           </div>
-          <div>
-            <label htmlFor="category" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Category</label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-              required
-            >
-              <option value="">Select Category</option>
-              <option value="Trading Loss">Trading Loss</option>
-              <option value="Loan">Bills</option>
-              <option value="Entertainment">Entertainment</option>
-              <option value="Shopping">Shopping</option>
-              <option value="Health">Health</option>
-              <option value="Education">Education</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+          {/* Category removed */}
           <div>
             <label htmlFor="description" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Description</label>
             <textarea

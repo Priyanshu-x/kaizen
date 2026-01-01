@@ -1,40 +1,70 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="glass-card p-3 rounded-xl border border-border/50 shadow-xl">
+        <p className="font-semibold text-sm mb-1">{label}</p>
+        <p className="text-primary font-bold">
+          ₹{Number(payload[0].value).toFixed(2)}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export function MonthlyNetBalanceChart({ data }) {
-  // Format month string for better display, e.g., "2023-1" to "Jan 2023"
   const formatMonth = (monthString) => {
     const [year, monthNum] = monthString.split('-').map(Number);
-    const date = new Date(year, monthNum - 1); // Month is 0-indexed
-    return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+    const date = new Date(year, monthNum - 1);
+    return date.toLocaleString('default', { month: 'short', year: '2-digit' });
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Monthly Net Balance Trend</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          data={data}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" dark:stroke="#444" />
-          <XAxis dataKey="month" tickFormatter={formatMonth} stroke="#888" dark:stroke="#ccc" />
-          <YAxis stroke="#888" dark:stroke="#ccc" />
-          <Tooltip
-            formatter={(value) => `$${value.toFixed(2)}`}
-            labelFormatter={(label) => formatMonth(label)}
-            contentStyle={{ backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '4px' }}
-            itemStyle={{ color: '#333' }}
-          />
-          <Legend />
-          <Line type="monotone" dataKey="netBalance" stroke="#8884d8" activeDot={{ r: 8 }} name="Net Balance" />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <Card className="glass-card border-border/50 shadow-md">
+      <CardHeader>
+        <CardTitle>Monthly Net Balance</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={data}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground))" opacity={0.1} />
+              <XAxis
+                dataKey="month"
+                tickFormatter={formatMonth}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                dy={10}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                tickFormatter={(value) => `₹${value}`}
+              />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1, strokeDasharray: '3 3' }} />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="netBalance"
+                stroke="#6366f1"
+                name="Net Balance"
+                strokeWidth={3}
+                dot={{ r: 4, fill: "hsl(var(--background))", strokeWidth: 2 }}
+                activeDot={{ r: 6, fill: "#6366f1" }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

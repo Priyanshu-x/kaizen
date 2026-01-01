@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useTransaction } from "../context/TransactionContext";
+import { Edit2, Trash2, ArrowUpCircle, ArrowDownCircle, Search, Filter } from "lucide-react";
 
 export function TransactionTable() {
-  const { transactions, addTransaction, updateTransaction, deleteTransaction } = useTransaction();
+  const { transactions, updateTransaction, deleteTransaction } = useTransaction();
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [editingIndex, setEditingIndex] = useState(null);
@@ -25,13 +26,15 @@ export function TransactionTable() {
   });
 
   const handleDelete = (id) => {
-    deleteTransaction(id);
+    if (window.confirm("Are you sure you want to delete this transaction?")) {
+      deleteTransaction(id);
+    }
   };
 
   const handleEdit = (id) => {
     const transactionToEdit = transactions.find(t => t._id === id);
     if (transactionToEdit) {
-      setEditingIndex(id); // Use id as editingIndex to identify the transaction
+      setEditingIndex(id);
       setEditData({ ...transactionToEdit, amount: String(transactionToEdit.amount), type: transactionToEdit.type });
     }
   };
@@ -40,9 +43,9 @@ export function TransactionTable() {
     if (editingIndex !== null) {
       const updatedTransaction = {
         ...editData,
-        amount: Number(editData.amount.replace(/[$₹]/g, "")), // Convert to number for backend
+        amount: Number(editData.amount.replace(/[$₹]/g, "")),
       };
-      updateTransaction(editingIndex, updatedTransaction); // Use editingIndex (which is the _id)
+      updateTransaction(editingIndex, updatedTransaction);
       setEditingIndex(null);
       setEditData({ date: "", source: "", amount: "", category: "", description: "" });
     }
@@ -53,131 +56,180 @@ export function TransactionTable() {
     setEditData({ date: "", source: "", amount: "", category: "", description: "", type: "" });
   };
 
+  const getTypeBadge = (type) => {
+    if (type === "income") {
+      return (
+        <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+          <ArrowUpCircle className="w-3.5 h-3.5" /> Income
+        </span>
+      );
+    }
+    return (
+      <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-muted-foreground/20">
+        <ArrowDownCircle className="w-3.5 h-3.5" /> Expense
+      </span>
+    );
+  };
+
   return (
     <>
-      <div className="glass-card p-2 sm:p-4 rounded-lg shadow-md mt-6 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-200 dark:bg-gray-700">
-              <th className="p-1 sm:p-2 text-left cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" onClick={() => handleSort("date")}>
-                Date {sortColumn === "date" && (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th className="p-1 sm:p-2 text-left cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" onClick={() => handleSort("source")}>
-                Source {sortColumn === "source" && (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th className="p-1 sm:p-2 text-left cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" onClick={() => handleSort("amount")}>
-                Amount {sortColumn === "amount" && (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th className="p-1 sm:p-2 text-left cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" onClick={() => handleSort("category")}>
-                Category {sortColumn === "category" && (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th className="p-1 sm:p-2 text-left cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" onClick={() => handleSort("description")}>
-                Description {sortColumn === "description" && (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th className="p-1 sm:p-2 text-left cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200" onClick={() => handleSort("type")}>
-                Type {sortColumn === "type" && (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th className="p-1 sm:p-2 text-gray-800 dark:text-gray-200">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedTransactions.map((t) => (
-              <tr key={t._id} className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200">
-                <td className="p-1 sm:p-2">{t.date}</td>
-                <td className="p-1 sm:p-2">{t.source}</td>
-                <td className="p-1 sm:p-2">{`₹${Number(t.amount).toFixed(2)}`}</td>
-                <td className="p-1 sm:p-2">{t.category}</td>
-                <td className="p-1 sm:p-2">{t.description || "N/A"}</td>
-                <td className={`p-1 sm:p-2 ${t.type === "income" ? "text-green-600" : "text-red-600"}`}>
-                  {t.type}
-                </td>
-                <td className="p-1 sm:p-2 flex flex-col sm:flex-row gap-1 sm:space-x-2">
-                  <button
-                    onClick={() => handleDelete(t._id)}
-                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800"
+      <div className="glass-card rounded-2xl overflow-hidden mt-8 border border-border/50">
+        <div className="p-6 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-border/50">
+          <h3 className="text-xl font-bold font-heading">Recent Transactions</h3>
+          <div className="flex gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="pl-9 pr-4 py-2 bg-secondary/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border-none"
+              />
+            </div>
+            <button className="p-2 bg-secondary/50 rounded-xl text-muted-foreground hover:text-foreground transition-colors">
+              <Filter className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-secondary/30">
+              <tr>
+                {["Date", "Source", "Amount", "Description", "Type", "Actions"].map((header) => (
+                  <th
+                    key={header}
+                    className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-primary transition-colors"
+                    onClick={() => header !== "Actions" && handleSort(header.toLowerCase())}
                   >
-                    Delete
-                  </button>
-                  <button
-                    onClick={() => handleEdit(t._id)}
-                    className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 dark:bg-yellow-700 dark:hover:bg-yellow-800"
-                  >
-                    Edit
-                  </button>
-                </td>
+                    {header}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border/50">
+              {sortedTransactions.map((t) => (
+                <tr key={t._id} className="hover:bg-secondary/20 transition-colors group">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{t.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{t.source}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold tracking-tight">
+                    {t.type === "income" ? "+" : "-"}₹{Number(t.amount).toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground max-w-xs truncate">{t.description || "—"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {getTypeBadge(t.type)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleEdit(t._id)}
+                        className="p-1.5 text-foreground hover:bg-secondary rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(t._id)}
+                        className="p-1.5 text-muted-foreground hover:bg-secondary rounded-lg transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {sortedTransactions.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center text-muted-foreground">
+                    No transactions found. Start by adding one!
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {editingIndex !== null && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg w-11/12 sm:w-full max-w-md text-gray-900 dark:text-gray-100">
-            <h3 className="text-lg sm:text-xl font-bold mb-4">Edit Transaction</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-card w-full max-w-md p-6 rounded-2xl shadow-xl animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-bold font-heading mb-6">Edit Transaction</h3>
             <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }} className="space-y-4">
-              <input
-                type="date"
-                value={editData.date}
-                onChange={(e) => setEditData({ ...editData, date: e.target.value })}
-                className="p-2 border rounded w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                required
-              />
-              <input
-                type="text"
-                value={editData.source}
-                onChange={(e) => setEditData({ ...editData, source: e.target.value })}
-                placeholder="Source"
-                className="p-2 border rounded w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                required
-              />
-              <input
-                type="number"
-                value={editData.amount}
-                onChange={(e) => setEditData({ ...editData, amount: e.target.value })}
-                placeholder="Amount"
-                className="p-2 border rounded w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                required
-              />
-              <select
-                value={editData.type}
-                onChange={(e) => setEditData({ ...editData, type: e.target.value })}
-                className="p-2 border rounded w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                required
-              >
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-              </select>
-              <select
-                value={editData.category}
-                onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                className="p-2 border rounded w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                required
-              >
-                {["Freelancing", "Trading", "Salary", "Gigs", "Other"].map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-              <textarea
-                value={editData.description}
-                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                placeholder="Description"
-                rows="3"
-                className="p-2 border rounded w-full bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-              ></textarea>
-              <div className="flex flex-col sm:flex-row gap-2 sm:space-x-4 mt-4">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 dark:bg-green-700 dark:hover:bg-green-800 w-full"
-                >
-                  Save
-                </button>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground uppercase">Date</label>
+                <input
+                  type="date"
+                  value={editData.date}
+                  onChange={(e) => setEditData({ ...editData, date: e.target.value })}
+                  className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-sans"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground uppercase">Type</label>
+                  <select
+                    value={editData.type}
+                    onChange={(e) => setEditData({ ...editData, type: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
+                    required
+                  >
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground uppercase">Amount</label>
+                  <input
+                    type="number"
+                    value={editData.amount}
+                    onChange={(e) => setEditData({ ...editData, amount: e.target.value })}
+                    placeholder="0.00"
+                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground uppercase">Source</label>
+                <input
+                  type="text"
+                  value={editData.source}
+                  onChange={(e) => setEditData({ ...editData, source: e.target.value })}
+                  placeholder="e.g. Salary, Client X"
+                  className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
+                  required
+                />
+              </div>
+
+              {/* Category Edit Removed */}
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground uppercase">Description</label>
+                <textarea
+                  value={editData.description}
+                  onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                  placeholder="Add notes..."
+                  rows="3"
+                  className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all resize-none"
+                ></textarea>
+              </div>
+
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 dark:bg-gray-700 dark:hover:bg-gray-800 w-full"
+                  className="flex-1 px-4 py-3 rounded-xl bg-secondary text-foreground hover:bg-secondary/80 font-medium transition-colors"
                 >
                   Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-medium shadow-lg shadow-primary/20 transition-all"
+                >
+                  Save Changes
                 </button>
               </div>
             </form>

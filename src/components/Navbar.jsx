@@ -1,36 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Wallet, Sun, Moon, UserCircle } from "lucide-react"; // Only keeping necessary icons
+import { Wallet, Sun, Moon, UserCircle, Plus, FileSpreadsheet, LogOut, Download, Upload } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
-import { useTransaction } from "../context/TransactionContext"; // Import useTransaction
-import { AddIncomeForm } from "./AddIncomeForm"; // Import AddIncomeForm
-import AddExpenseForm from "./AddExpenseForm"; // Import AddExpenseForm
+import { useTransaction } from "../context/TransactionContext";
+import { AddIncomeForm } from "./AddIncomeForm";
+import AddExpenseForm from "./AddExpenseForm";
 
 export function Navbar() {
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const { user, logout } = useAuth(); // Destructure user from useAuth
-  const { transactions, addTransaction } = useTransaction(); // Get transactions and addTransaction
+  const { user, logout } = useAuth();
+  const { transactions, addTransaction } = useTransaction();
   const [isAddIncomeFormOpen, setIsAddIncomeFormOpen] = useState(false);
-  const [isAddExpenseFormOpen, setIsAddExpenseFormOpen] = useState(false); // State for expense form
+  const [isAddExpenseFormOpen, setIsAddExpenseFormOpen] = useState(false);
 
-  const handleAddIncomeClick = () => {
-    setIsAddIncomeFormOpen(true);
-  };
-
-  const handleCloseAddIncomeForm = () => {
-    setIsAddIncomeFormOpen(false);
-  };
-
-  const handleAddExpenseClick = () => { // Function to open expense form
-    setIsAddExpenseFormOpen(true);
-  };
-
-  const handleCloseAddExpenseForm = () => { // Function to close expense form
-    setIsAddExpenseFormOpen(false);
-  };
-
-  // Basic export to CSV (client-side)
   const exportTransactions = () => {
     const csv = [
       ["Date,Source,Amount,Category,Description"].join(","),
@@ -45,14 +28,13 @@ export function Navbar() {
     window.URL.revokeObjectURL(url);
   };
 
-  // Basic import from CSV (client-side, to be enhanced)
   const importTransactions = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
         const text = event.target.result;
-        const rows = text.split("\n").slice(1); // Skip header
+        const rows = text.split("\n").slice(1);
         const newTransactions = rows
           .map((row) => {
             const [date, source, amount, category, description] = row.split(",");
@@ -66,78 +48,95 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-3 sm:p-4 shadow-sm">
-      <div className="container mx-auto flex justify-between items-center">
-        {/* Left side (empty for now, or could add logo/title) */}
-        <div className="flex items-center">
-          {/* You can add a logo or title here if needed */}
-        </div>
-
-        {/* Center: Action Buttons (conditionally rendered) */}
-        {user && (
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <button
-              onClick={handleAddIncomeClick}
-              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md hover:from-blue-600 hover:to-purple-700 transition-all duration-200"
-            >
-              Add Income
-            </button>
-            <button
-              onClick={handleAddExpenseClick} // Add expense button
-              className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-md hover:from-red-600 hover:to-red-800 transition-all duration-200"
-            >
-              Add Expense
-            </button>
-            <button
-              onClick={exportTransactions}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all duration-200"
-            >
-              Export CSV
-            </button>
-            <label className="px-4 py-2 bg-yellow-500 text-white rounded-md cursor-pointer hover:bg-yellow-600 transition-all duration-200">
-              Import CSV
-              <input
-                type="file"
-                accept=".csv"
-                onChange={importTransactions}
-                className="hidden"
-              />
-            </label>
-            <button
-              onClick={logout}
-              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all duration-200"
-            >
-              Logout
-            </button>
+    <>
+      <nav className="glass-header sticky top-0 z-30 px-6 py-4">
+        <div className="flex justify-between items-center">
+          {/* Breadcrumbs or Page Title could go here (mobile mainly) */}
+          <div className="flex items-center md:hidden gap-2">
+            <Wallet className="h-6 w-6 text-primary" />
+            <span className="font-bold text-lg font-heading">2Money</span>
           </div>
-        )}
 
-        {/* Right side: User Profile and Dark Mode Toggle */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          {user && (
-            <div className="flex items-center space-x-2">
-              <UserCircle className="h-8 w-8 text-gray-600 dark:text-gray-300" />
-              <span className="text-gray-800 dark:text-gray-100 hidden md:block">Priyanshu</span>
-            </div>
-          )}
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
-          >
-            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </button>
+          <div className="hidden md:block">
+            {/* Spacer or Breadcrumbs */}
+          </div>
+
+          <div className="flex items-center gap-3">
+            {user && (
+              <>
+                <div className="flex items-center gap-2 mr-2">
+                  <button
+                    onClick={() => setIsAddIncomeFormOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:shadow-lg transition-all duration-300 font-medium text-sm border border-primary/20"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Income</span>
+                  </button>
+                  <button
+                    onClick={() => setIsAddExpenseFormOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-xl hover:bg-secondary/80 transition-all duration-300 font-medium text-sm border border-secondary"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Expense</span>
+                  </button>
+                </div>
+
+                <div className="h-8 w-[1px] bg-border mx-2"></div>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={exportTransactions}
+                    className="p-2 text-muted-foreground hover:text-primary rounded-lg hover:bg-secondary transition-colors"
+                    title="Export CSV"
+                  >
+                    <Download className="h-5 w-5" />
+                  </button>
+                  <label className="p-2 text-muted-foreground hover:text-primary rounded-lg hover:bg-secondary transition-colors cursor-pointer" title="Import CSV">
+                    <Upload className="h-5 w-5" />
+                    <input
+                      type="file"
+                      accept=".csv"
+                      onChange={importTransactions}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <div className="h-8 w-[1px] bg-border mx-2"></div>
+              </>
+            )}
+
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-lg bg-secondary text-foreground hover:bg-primary/10 hover:text-primary transition-all duration-300"
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+
+            {user && (
+              <button
+                onClick={logout}
+                className="p-2 text-muted-foreground hover:text-destructive rounded-lg hover:bg-destructive/10 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </nav>
+
       {isAddIncomeFormOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
-          <AddIncomeForm onAdd={addTransaction} onClose={handleCloseAddIncomeForm} />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4">
+          <AddIncomeForm onAdd={addTransaction} onClose={() => setIsAddIncomeFormOpen(false)} />
         </div>
       )}
-      {isAddExpenseFormOpen && ( // Conditionally render AddExpenseForm
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
-          <AddExpenseForm onClose={handleCloseAddExpenseForm} />
+
+      {isAddExpenseFormOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4">
+          <AddExpenseForm onClose={() => setIsAddExpenseFormOpen(false)} />
         </div>
       )}
-    </nav>
+    </>
   );
 }
