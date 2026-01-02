@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { StatsCard } from "../components/StatsCard";
 import { TransactionTable } from "../components/TransactionTable";
-import { IncomeChart } from "../components/IncomeChart";
+import { ProfitLossChart } from "../components/ProfitLossChart";
 import { MonthlyTrendChart } from "../components/MonthlyTrendchart";
 import { useTransaction } from "../context/TransactionContext";
 import { useAuth } from "../context/AuthContext";
@@ -120,7 +120,7 @@ export function Dashboard() {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div variants={item}>
-            <IncomeChart entries={transactions.filter(t => t.type === 'income')} />
+            <ProfitLossChart transactions={transactions} />
           </motion.div>
           <motion.div variants={item}>
             <MonthlyTrendChart entries={transactions} />
