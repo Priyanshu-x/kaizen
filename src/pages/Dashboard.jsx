@@ -81,7 +81,7 @@ export function Dashboard() {
           Dashboard
         </h1>
         <p className="text-muted-foreground">
-          Welcome back, {user?.name || "User"}. Here's your financial overview.
+          Welcome back, {user?.name || "Priyanshu"}. Here's your financial overview.
         </p>
       </div>
 

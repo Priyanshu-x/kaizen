@@ -7,10 +7,12 @@ export function TransactionProvider({ children }) {
   const [loading, setLoading] = useState(true); // Add loading state
   const [error, setError] = useState(null); // Add error state
 
+  const API_URL = import.meta.env.VITE_API_URL || "https://2money-backend.onrender.com";
+
   // Fetch transactions on mount
   useEffect(() => {
     setLoading(true);
-    fetch("https://2money-backend.onrender.com/api/transactions")
+    fetch(`${API_URL}/api/transactions`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch transactions");
         return res.json();
@@ -32,7 +34,7 @@ export function TransactionProvider({ children }) {
 
   // Add a new transaction
   const addTransaction = (data) => {
-    fetch("https://2money-backend.onrender.com/api/transactions", {
+    fetch(`${API_URL}/api/transactions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -49,7 +51,7 @@ export function TransactionProvider({ children }) {
 
   // Update an existing transaction
   const updateTransaction = (id, data) => {
-    fetch(`https://2money-backend.onrender.com/api/transactions/${id}`, {
+    fetch(`${API_URL}/api/transactions/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -68,7 +70,7 @@ export function TransactionProvider({ children }) {
 
   // Delete a transaction
   const deleteTransaction = (id) => {
-    fetch(`https://2money-backend.onrender.com/api/transactions/${id}`, {
+    fetch(`${API_URL}/api/transactions/${id}`, {
       method: "DELETE",
     })
       .then((res) => {

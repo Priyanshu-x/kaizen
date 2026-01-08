@@ -76,7 +76,7 @@ export function ProfitLossChart({ transactions }) {
                                     color: textColor,
                                     borderRadius: "0.5rem"
                                 }}
-                                formatter={(value, name) => [`₹${value.toFixed(2)}`, name === "income" ? "Income" : "Expense"]}
+                                formatter={(value, name) => [`₹${value.toFixed(2)}`, name === "Income" ? "Income" : "Expense"]}
                                 cursor={{ fill: 'hsl(var(--muted)/0.2)' }}
                             />
                             <Legend wrapperStyle={{ paddingTop: '10px' }} />
