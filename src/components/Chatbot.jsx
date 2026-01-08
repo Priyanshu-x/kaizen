@@ -38,41 +38,61 @@ export function Chatbot() {
 
     // Basic analysis functions
     const getTotalIncome = () => transactionsData.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
-    const getHighestIncome = () => Math.max(...transactionsData.filter(t => t.type === 'income').map(t => Number(t.amount)));
-    const getLowestIncome = () => Math.min(...transactionsData.filter(t => t.type === 'income').map(t => Number(t.amount)));
-    const getAverageIncome = () => {
-      const incomes = transactionsData.filter(t => t.type === 'income');
-      return incomes.length ? getTotalIncome() / incomes.length : 0;
+    const getTotalExpense = () => transactionsData.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const getHighestVal = (type) => Math.max(...transactionsData.filter(t => t.type === type).map(t => Number(t.amount)));
+    const getLowestVal = (type) => Math.min(...transactionsData.filter(t => t.type === type).map(t => Number(t.amount)));
+
+    const getAverageVal = (type) => {
+      const items = transactionsData.filter(t => t.type === type);
+      return items.length ? (items.reduce((sum, t) => sum + Number(t.amount), 0) / items.length) : 0;
     };
-    const getIncomeByCategory = () => {
+
+    const getByTypeCategory = (type) => {
       const categoryMap = {};
       transactionsData.forEach(t => {
         const amount = Number(t.amount);
-        if (!isNaN(amount) && t.type === 'income') {
+        if (!isNaN(amount) && t.type === type) {
           const category = t.category || "Other";
           categoryMap[category] = (categoryMap[category] || 0) + amount;
         }
       });
-      return Object.entries(categoryMap).map(([category, income]) => `${category}: ₹${income.toFixed(2)}`).join(', ');
+      return Object.entries(categoryMap).map(([category, value]) => `${category}: ₹${value.toFixed(2)}`).join(', ');
     };
 
     if (lowerQuery.includes('hello') || lowerQuery.includes('hi')) {
-      return "Hello! How can I help you with your financial data today?";
+      return "Hello! I can help you analyze your finances. Type 'help' to see what I can do!";
+    } else if (lowerQuery.includes('help')) {
+      return "Try asking about: \n• Total Income / Total Expense\n• Net Balance\n• Highest/Lowest Income or Expense\n• Average Income/Expense\n• Income/Expense by Category";
     } else if (lowerQuery.includes('total income')) {
       return `Your total recorded income is ₹${getTotalIncome().toFixed(2)}.`;
+    } else if (lowerQuery.includes('total expense')) {
+      return `Your total recorded expense is ₹${getTotalExpense().toFixed(2)}.`;
+    } else if (lowerQuery.includes('net balance') || lowerQuery.includes('balance') || lowerQuery.includes('savings')) {
+      const balance = getTotalIncome() - getTotalExpense();
+      return `Your net balance is ₹${balance.toFixed(2)}.`;
     } else if (lowerQuery.includes('highest income')) {
-      return `Your highest single income amount is ₹${getHighestIncome().toFixed(2)}.`;
+      return `Your highest single income amount is ₹${getHighestVal('income').toFixed(2)}.`;
     } else if (lowerQuery.includes('lowest income')) {
-      return `Your lowest single income amount is ₹${getLowestIncome().toFixed(2)}.`;
+      return `Your lowest single income amount is ₹${getLowestVal('income').toFixed(2)}.`;
+    } else if (lowerQuery.includes('highest expense')) {
+      return `Your highest single expense amount is ₹${getHighestVal('expense').toFixed(2)}.`;
+    } else if (lowerQuery.includes('lowest expense')) {
+      return `Your lowest single expense amount is ₹${getLowestVal('expense').toFixed(2)}.`;
     } else if (lowerQuery.includes('average income')) {
-      return `Your average income per transaction is ₹${getAverageIncome().toFixed(2)}.`;
+      return `Your average income per transaction is ₹${getAverageVal('income').toFixed(2)}.`;
+    } else if (lowerQuery.includes('average expense')) {
+      return `Your average expense per transaction is ₹${getAverageVal('expense').toFixed(2)}.`;
     } else if (lowerQuery.includes('income by category')) {
-      const categories = getIncomeByCategory();
-      return `Here's your income by category: ${categories}.`;
+      const categories = getByTypeCategory('income');
+      return categories ? `Income by category: ${categories}.` : "No income records found.";
+    } else if (lowerQuery.includes('expense by category')) {
+      const categories = getByTypeCategory('expense');
+      return categories ? `Expense by category: ${categories}.` : "No expense records found.";
     } else if (lowerQuery.includes('thank you') || lowerQuery.includes('thanks')) {
       return "You're welcome! Let me know if you have more questions.";
     } else {
-      return "I can help with: total income, highest/lowest/average income, or income by category. Just ask!";
+      return "I didn't quite catch that. Type 'help' to see available commands.";
     }
   };
 
@@ -102,7 +122,7 @@ export function Chatbot() {
             {messages.length === 0 && (
               <div className="text-center text-sm text-muted-foreground mt-10">
                 <p>👋 Hi! Im your personal finance assistant.</p>
-                <p className="mt-2">Try asking: "What is my total income?"</p>
+                <p className="mt-2">Try asking: "Total Expense" or type <strong>"help"</strong></p>
               </div>
             )}
             {messages.map((msg, index) => (
