@@ -16,7 +16,6 @@ export function AddIncomeForm({ onAdd, onClose }) {
     entryTime: "",
     exitTime: "",
     tax: "",
-    ruleFollowed: true,
   });
   const [error, setError] = useState("");
 
@@ -263,27 +262,6 @@ export function AddIncomeForm({ onAdd, onClose }) {
                     className={inputClasses}
                   />
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-start space-x-3 p-3 rounded-xl bg-secondary/30 border border-transparent hover:border-primary/20 transition-colors">
-              <input
-                type="checkbox"
-                name="ruleFollowed"
-                id="ruleFollowed-income"
-                checked={formData.ruleFollowed}
-                onChange={handleChange}
-                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-              />
-              <div>
-                <label htmlFor="ruleFollowed-income" className="text-sm font-medium text-foreground cursor-pointer select-none">
-                  Trading Rules Followed?
-                </label>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Max 2 trades/day. No 2nd trade if 1st hit SL.
-                </p>
               </div>
             </div>
           </div>

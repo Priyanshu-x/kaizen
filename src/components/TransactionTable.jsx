@@ -7,7 +7,34 @@ export function TransactionTable() {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [editingIndex, setEditingIndex] = useState(null);
-  const [editData, setEditData] = useState({ date: "", source: "", amount: "", category: "", description: "", type: "", ruleFollowed: true });
+  const [editData, setEditData] = useState({ date: "", source: "", amount: "", category: "", description: "", type: "" });
+
+  const getRuleStatus = (transaction) => {
+    // 1. Find all trades for this specific date
+    const sameDayTrades = transactions.filter(t => t.date === transaction.date);
+
+    // 2. Sort them by time (Entry Time) to determine order
+    sameDayTrades.sort((a, b) => {
+      const timeA = a.entryTime || "00:00";
+      const timeB = b.entryTime || "00:00";
+      return timeA.localeCompare(timeB);
+    });
+
+    const index = sameDayTrades.findIndex(t => t._id === transaction._id);
+
+    // Rule 1: Max 2 Trades per day
+    if (index >= 2) return { followed: false, reason: "Violation: Max 2 trades/day limit exceeded" };
+
+    // Rule 2: If 1st trade is a Loss, stop trading
+    if (index > 0) {
+      const firstTrade = sameDayTrades[0];
+      if (firstTrade.type === "expense") {
+        return { followed: false, reason: "Violation: First trade was a loss. Stop trading." };
+      }
+    }
+
+    return { followed: true, reason: "Rules followed" };
+  };
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -55,7 +82,6 @@ export function TransactionTable() {
         ...transactionToEdit,
         amount: String(transactionToEdit.amount),
         type: transactionToEdit.type,
-        ruleFollowed: transactionToEdit.ruleFollowed ?? true // Default to true if undefined
       });
     }
   };
@@ -135,11 +161,14 @@ export function TransactionTable() {
                   <td className="px-4 py-3 whitespace-nowrap text-sm">{t.exitTime || "—"}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-red-500/80">{t.tax ? `₹${t.tax}` : "—"}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    {t.ruleFollowed !== false ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                    )}
+                    {(() => {
+                      const status = getRuleStatus(t);
+                      return status.followed ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" title={status.reason} />
+                      ) : (
+                        <AlertTriangle className="h-4 w-4 text-yellow-500" title={status.reason} />
+                      );
+                    })()}
                   </td>
                   <td className={`px-4 py-3 whitespace-nowrap text-sm font-bold tracking-tight ${t.amount >= 0 ? "text-green-500" : "text-red-500"}`}>
                     {t.amount >= 0 ? "+" : "-"}₹{Math.abs(Number(t.amount)).toFixed(2)}
@@ -220,20 +249,6 @@ export function TransactionTable() {
                     required
                   />
                 </div>
-              </div>
-
-              {/* Rules Checkbox in Edit */}
-              <div className="flex items-center space-x-3 p-3 rounded-xl bg-secondary/30">
-                <input
-                  type="checkbox"
-                  id="edit-ruleFollowed"
-                  checked={editData.ruleFollowed !== false}
-                  onChange={(e) => setEditData({ ...editData, ruleFollowed: e.target.checked })}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <label htmlFor="edit-ruleFollowed" className="text-sm font-medium text-foreground cursor-pointer select-none">
-                  Trading Rules Followed?
-                </label>
               </div>
 
               <div className="space-y-2">

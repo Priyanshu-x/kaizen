@@ -18,7 +18,6 @@ const AddExpenseForm = ({ onClose }) => {
     exitTime: '',
     category: 'Trading',
     tax: '',
-    ruleFollowed: true,
   });
   const [error, setError] = useState("");
 
@@ -263,26 +262,6 @@ const AddExpenseForm = ({ onClose }) => {
                     className={inputClasses}
                   />
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-start space-x-3 p-3 rounded-xl bg-secondary/30 border border-transparent hover:border-red-500/20 transition-colors">
-              <input
-                type="checkbox"
-                id="ruleFollowed"
-                checked={formData.ruleFollowed}
-                onChange={handleChange}
-                className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
-              />
-              <div>
-                <label htmlFor="ruleFollowed" className="text-sm font-medium text-foreground cursor-pointer select-none">
-                  Trading Rules Followed?
-                </label>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Max 2 trades/day. No 2nd trade if 1st hit SL.
-                </p>
               </div>
             </div>
           </div>
