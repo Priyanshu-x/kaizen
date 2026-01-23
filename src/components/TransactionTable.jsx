@@ -178,7 +178,7 @@ export function TransactionTable() {
 
       {editingIndex !== null && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-card w-full max-w-md p-6 rounded-2xl shadow-xl animate-in fade-in zoom-in duration-200">
+          <div className="glass-card w-full max-w-md max-h-[85vh] overflow-y-auto p-6 rounded-2xl shadow-xl animate-in fade-in zoom-in duration-200 custom-scrollbar">
             <h3 className="text-xl font-bold font-heading mb-6">Edit Transaction</h3>
             <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }} className="space-y-4">
 
