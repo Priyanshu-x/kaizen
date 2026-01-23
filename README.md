@@ -1,6 +1,6 @@
 Project Link: https://income-tracker-prika-x.vercel.app/
 
-# 2Money - Trading Tracker
+# =2money - Trading Tracker
 
 A specialized, monochrome web application designed exclusively for tracking trading income, expenses, and performance metrics. Built for focus and clarity.
 

@@ -38,7 +38,7 @@ export function Sidebar() {
             <Wallet className="h-8 w-8 text-primary-foreground" />
           </div>
           <h2 className="text-2xl font-bold text-foreground font-heading">
-            2Money
+            =2money
           </h2>
         </div>
 

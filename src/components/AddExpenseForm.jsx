@@ -1,108 +1,325 @@
 import React, { useState } from 'react';
 import { useTransaction } from '../context/TransactionContext';
-import { useTheme } from '../context/ThemeContext';
+import { X, Calendar, DollarSign, Type, FileText, Activity, Clock, Layers, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const AddExpenseForm = ({ onClose }) => {
   const { addTransaction } = useTransaction();
-  const { isDarkMode } = useTheme();
-  const [date, setDate] = useState('');
-  const [source, setSource] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('Trading');
-  const [description, setDescription] = useState('');
+  const [formData, setFormData] = useState({
+    date: '',
+    source: '',
+    amount: '',
+    description: '',
+    instrument: '',
+    lotSize: '',
+    buyingPrice: '',
+    sellingPrice: '',
+    entryTime: '',
+    exitTime: '',
+    category: 'Trading',
+    tax: '',
+    ruleFollowed: true,
+  });
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value
+    }));
+    setError("");
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!date || !source || !amount || !description) {
-      alert('Please fill in all fields');
+    if (!formData.date || !formData.source || !formData.amount || !formData.description) {
+      setError('Please fill in all required fields (Date, Loss Amount, Description).');
       return;
     }
 
     const newExpense = {
-      id: Date.now(), // Simple unique ID
-      date,
-      source,
-      amount: -Math.abs(parseFloat(amount)), // Ensure amount is negative
-      category: 'Trading', // Hardcode just in case
-      description,
+      id: Date.now(),
+      ...formData,
+      amount: -Math.abs(parseFloat(formData.amount)), // Ensure amount is negative
       type: 'expense',
     };
 
     addTransaction(newExpense);
-    onClose(); // Close the form after submission
+    onClose();
   };
 
+  const inputClasses = "w-full p-3 pl-10 rounded-xl bg-secondary/30 border border-transparent focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all outline-none placeholder:text-muted-foreground/50";
+  const labelClasses = "block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 ml-1";
+
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
-      <div className={`p-6 rounded-lg shadow-lg w-full max-w-md ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
-        <h2 className="text-2xl font-bold mb-4">Add New Expense</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="glass-card w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar rounded-2xl shadow-2xl border border-white/10"
+      >
+        <div className="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-white/5 bg-background/40 backdrop-blur-md">
           <div>
-            <label htmlFor="date" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Date</label>
-            <input
-              type="date"
-              id="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-              required
-            />
+            <h2 className="text-2xl font-bold font-heading bg-gradient-to-r from-red-500 to-red-600/60 bg-clip-text text-transparent">
+              Log Trading Loss
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">Record your trading expenses</p>
           </div>
-          <div>
-            <label htmlFor="source" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Source</label>
-            <input
-              type="text"
-              id="source"
-              value={source}
-              onChange={(e) => setSource(e.target.value)}
-              placeholder="e.g., F&O Trading"
-              className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-              required
-            />
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-secondary/50 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium flex items-center gap-2"
+            >
+              <AlertCircle className="h-4 w-4" />
+              {error}
+            </motion.div>
+          )}
+
+          {/* Primary Details Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+              <span className="w-1 h-4 rounded-full bg-red-500"></span>
+              Primary Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className={labelClasses}>Date</label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="date"
+                    id="date"
+                    value={formData.date}
+                    onChange={handleChange}
+                    className={inputClasses}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClasses}>Loss Amount</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
+                  <input
+                    type="number"
+                    id="amount"
+                    value={formData.amount}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    className={`${inputClasses} font-mono font-bold text-red-500`}
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Tax Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
+              <div>
+                <label className={labelClasses}>Tax / Charges</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-400" />
+                  <input
+                    type="number"
+                    id="tax"
+                    value={formData.tax}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    className={`${inputClasses} font-mono text-red-400`}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <label htmlFor="amount" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Amount</label>
-            <input
-              type="number"
-              id="amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="e.g., 50.00"
-              className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-              required
-            />
+
+          <div className="h-px bg-border/30" />
+
+          {/* Trade Specifics Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+              <span className="w-1 h-4 rounded-full bg-orange-500"></span>
+              Trade Specifics
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className={labelClasses}>Instrument Name</label>
+                <div className="relative">
+                  <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    id="instrument"
+                    value={formData.instrument}
+                    onChange={handleChange}
+                    placeholder="e.g. NIFTY 22000 CE"
+                    className={`${inputClasses} uppercase`}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClasses}>Strategy / Source</label>
+                <div className="relative">
+                  <Type className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    id="source"
+                    value={formData.source}
+                    onChange={handleChange}
+                    placeholder="e.g. Stoploss Hit"
+                    className={inputClasses}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <label className={labelClasses}>Lot Size</label>
+                <div className="relative">
+                  <Layers className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    id="lotSize"
+                    value={formData.lotSize}
+                    onChange={handleChange}
+                    placeholder="e.g. 50"
+                    className={inputClasses}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className={labelClasses}>Buy Price</label>
+                <div className="relative">
+                  <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="number"
+                    id="buyingPrice"
+                    value={formData.buyingPrice}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    className={inputClasses}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className={labelClasses}>Sell Price</label>
+                <div className="relative">
+                  <TrendingDown className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="number"
+                    id="sellingPrice"
+                    value={formData.sellingPrice}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    className={inputClasses}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          {/* Category removed */}
-          <div>
-            <label htmlFor="description" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Description</label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Brief description of the expense"
-              rows="3"
-              className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
-              required
-            ></textarea>
+
+          <div className="h-px bg-border/30" />
+
+          {/* Timing Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+              <span className="w-1 h-4 rounded-full bg-red-400"></span>
+              Session Timing
+            </h3>
+            <div className="grid grid-cols-2 gap-5">
+              <div>
+                <label className={labelClasses}>Entry Time</label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="time"
+                    id="entryTime"
+                    value={formData.entryTime}
+                    onChange={handleChange}
+                    className={inputClasses}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className={labelClasses}>Exit Time</label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="time"
+                    id="exitTime"
+                    value={formData.exitTime}
+                    onChange={handleChange}
+                    className={inputClasses}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-end space-x-3">
+
+          <div className="space-y-2">
+            <div className="flex items-start space-x-3 p-3 rounded-xl bg-secondary/30 border border-transparent hover:border-red-500/20 transition-colors">
+              <input
+                type="checkbox"
+                id="ruleFollowed"
+                checked={formData.ruleFollowed}
+                onChange={handleChange}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+              />
+              <div>
+                <label htmlFor="ruleFollowed" className="text-sm font-medium text-foreground cursor-pointer select-none">
+                  Trading Rules Followed?
+                </label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Max 2 trades/day. No 2nd trade if 1st hit SL.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className={labelClasses}>Notes / Mistakes</label>
+            <div className="relative">
+              <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <textarea
+                id="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="What went wrong?"
+                rows="3"
+                className={`${inputClasses} pl-10 resize-none`}
+              ></textarea>
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className={`px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isDarkMode ? 'border-gray-600 text-gray-300 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+              className="flex-1 px-6 py-3 rounded-xl bg-secondary text-foreground hover:bg-secondary/80 font-medium transition-all duration-200"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${isDarkMode ? 'bg-indigo-700 hover:bg-indigo-600 dark:bg-indigo-800 dark:hover:bg-indigo-700' : 'bg-indigo-600 hover:bg-indigo-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+              className="flex-1 px-6 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 font-medium shadow-lg shadow-red-600/25 transition-all duration-200"
             >
-              Add Expense
+              Log Loss
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

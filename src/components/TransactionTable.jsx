@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useTransaction } from "../context/TransactionContext";
-import { Edit2, Trash2, ArrowUpCircle, ArrowDownCircle, Search, Filter } from "lucide-react";
+import { Edit2, Trash2, ArrowUpCircle, ArrowDownCircle, Search, Filter, CheckCircle, AlertTriangle } from "lucide-react";
 
 export function TransactionTable() {
   const { transactions, updateTransaction, deleteTransaction } = useTransaction();
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [editingIndex, setEditingIndex] = useState(null);
-  const [editData, setEditData] = useState({ date: "", source: "", amount: "", category: "", description: "", type: "" });
+  const [editData, setEditData] = useState({ date: "", source: "", amount: "", category: "", description: "", type: "", ruleFollowed: true });
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -19,10 +19,26 @@ export function TransactionTable() {
   };
 
   const sortedTransactions = [...transactions].sort((a, b) => {
-    if (!sortColumn) return 0;
+    if (!sortColumn) {
+      // Default Sort: Date DESC, then Entry Time DESC
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateB - dateA;
+      }
+      const timeA = a.entryTime || "00:00";
+      const timeB = b.entryTime || "00:00";
+      return timeB.localeCompare(timeA);
+    }
+
+    if (["amount", "buyingPrice", "sellingPrice", "tax"].includes(sortColumn)) {
+      return sortDirection === "asc"
+        ? Number(a[sortColumn] || 0) > Number(b[sortColumn] || 0) ? 1 : -1
+        : Number(a[sortColumn] || 0) < Number(b[sortColumn] || 0) ? 1 : -1;
+    }
     return sortDirection === "asc"
-      ? a[sortColumn] > b[sortColumn] ? 1 : -1
-      : a[sortColumn] < b[sortColumn] ? 1 : -1;
+      ? (a[sortColumn] || "") > (b[sortColumn] || "") ? 1 : -1
+      : (a[sortColumn] || "") < (b[sortColumn] || "") ? 1 : -1;
   });
 
   const handleDelete = (id) => {
@@ -35,7 +51,12 @@ export function TransactionTable() {
     const transactionToEdit = transactions.find(t => t._id === id);
     if (transactionToEdit) {
       setEditingIndex(id);
-      setEditData({ ...transactionToEdit, amount: String(transactionToEdit.amount), type: transactionToEdit.type });
+      setEditData({
+        ...transactionToEdit,
+        amount: String(transactionToEdit.amount),
+        type: transactionToEdit.type,
+        ruleFollowed: transactionToEdit.ruleFollowed ?? true // Default to true if undefined
+      });
     }
   };
 
@@ -44,6 +65,7 @@ export function TransactionTable() {
       const updatedTransaction = {
         ...editData,
         amount: Number(editData.amount.replace(/[$₹]/g, "")),
+        tax: Number(editData.tax || 0),
       };
       updateTransaction(editingIndex, updatedTransaction);
       setEditingIndex(null);
@@ -56,27 +78,15 @@ export function TransactionTable() {
     setEditData({ date: "", source: "", amount: "", category: "", description: "", type: "" });
   };
 
-  const getTypeBadge = (type) => {
-    if (type === "income") {
-      return (
-        <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-          <ArrowUpCircle className="w-3.5 h-3.5" /> Income
-        </span>
-      );
-    }
-    return (
-      <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-muted-foreground/20">
-        <ArrowDownCircle className="w-3.5 h-3.5" /> Expense
-      </span>
-    );
-  };
+  // ... (getTypeBadge helper is fine)
 
   return (
     <>
       <div className="glass-card rounded-2xl overflow-hidden mt-8 border border-border/50">
         <div className="p-6 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-border/50">
-          <h3 className="text-xl font-bold font-heading">Recent Transactions</h3>
+          <h3 className="text-xl font-bold font-heading">Recent Transactions/Trades</h3>
           <div className="flex gap-2">
+            {/* ... search/filter ... */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
@@ -95,11 +105,18 @@ export function TransactionTable() {
           <table className="w-full">
             <thead className="bg-secondary/30">
               <tr>
-                {["Date", "Source", "Amount", "Description", "Type", "Actions"].map((header) => (
+                {["Date", "Instrument", "Lot Size", "Buy", "Sell", "Entry", "Exit", "Charges", "Rules", "P&L", "Actions"].map((header) => (
                   <th
                     key={header}
-                    className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-primary transition-colors"
-                    onClick={() => header !== "Actions" && handleSort(header.toLowerCase())}
+                    className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-primary transition-colors whitespace-nowrap"
+                    onClick={() => {
+                      const keyMap = {
+                        "Date": "date", "Instrument": "instrument", "Lot Size": "lotSize",
+                        "Buy": "buyingPrice", "Sell": "sellingPrice",
+                        "Entry": "entryTime", "Exit": "exitTime", "Charges": "tax", "Rules": "ruleFollowed", "P&L": "amount"
+                      };
+                      header !== "Actions" && handleSort(keyMap[header] || header.toLowerCase());
+                    }}
                   >
                     {header}
                   </th>
@@ -109,16 +126,25 @@ export function TransactionTable() {
             <tbody className="divide-y divide-border/50">
               {sortedTransactions.map((t) => (
                 <tr key={t._id} className="hover:bg-secondary/20 transition-colors group">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{t.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">{t.source}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold tracking-tight">
-                    {t.type === "income" ? "+" : "-"}₹{Number(t.amount).toFixed(2)}
+                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">{t.date}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">{t.instrument || "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">{t.lotSize || "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">{t.buyingPrice ? `₹${t.buyingPrice}` : "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">{t.sellingPrice ? `₹${t.sellingPrice}` : "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">{t.entryTime || "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">{t.exitTime || "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-red-500/80">{t.tax ? `₹${t.tax}` : "—"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {t.ruleFollowed !== false ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                    )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground max-w-xs truncate">{t.description || "—"}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getTypeBadge(t.type)}
+                  <td className={`px-4 py-3 whitespace-nowrap text-sm font-bold tracking-tight ${t.amount >= 0 ? "text-green-500" : "text-red-500"}`}>
+                    {t.amount >= 0 ? "+" : "-"}₹{Math.abs(Number(t.amount)).toFixed(2)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => handleEdit(t._id)}
@@ -140,7 +166,7 @@ export function TransactionTable() {
               ))}
               {sortedTransactions.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-muted-foreground">
+                  <td colSpan="11" className="px-6 py-12 text-center text-muted-foreground">
                     No transactions found. Start by adding one!
                   </td>
                 </tr>
@@ -155,6 +181,9 @@ export function TransactionTable() {
           <div className="glass-card w-full max-w-md p-6 rounded-2xl shadow-xl animate-in fade-in zoom-in duration-200">
             <h3 className="text-xl font-bold font-heading mb-6">Edit Transaction</h3>
             <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }} className="space-y-4">
+
+              {/* Other inputs remain same... Adding Rule Checkbox */}
+
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground uppercase">Date</label>
                 <input
@@ -166,6 +195,7 @@ export function TransactionTable() {
                 />
               </div>
 
+              {/* ... Type, Amount ... */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-muted-foreground uppercase">Type</label>
@@ -192,6 +222,34 @@ export function TransactionTable() {
                 </div>
               </div>
 
+              {/* Rules Checkbox in Edit */}
+              <div className="flex items-center space-x-3 p-3 rounded-xl bg-secondary/30">
+                <input
+                  type="checkbox"
+                  id="edit-ruleFollowed"
+                  checked={editData.ruleFollowed !== false}
+                  onChange={(e) => setEditData({ ...editData, ruleFollowed: e.target.checked })}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="edit-ruleFollowed" className="text-sm font-medium text-foreground cursor-pointer select-none">
+                  Trading Rules Followed?
+                </label>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground uppercase">Tax / Charges</label>
+                <input
+                  type="number"
+                  value={editData.tax || ""}
+                  onChange={(e) => setEditData({ ...editData, tax: e.target.value })}
+                  placeholder="0.00"
+                  className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
+                />
+              </div>
+
+              {/* ... Rest of inputs ... */}
+
+
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground uppercase">Source</label>
                 <input
@@ -204,7 +262,69 @@ export function TransactionTable() {
                 />
               </div>
 
-              {/* Category Edit Removed */}
+              {/* Trade Details */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground uppercase">Instrument</label>
+                  <input
+                    type="text"
+                    value={editData.instrument || ""}
+                    onChange={(e) => setEditData({ ...editData, instrument: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground uppercase">Lot Size</label>
+                  <input
+                    type="text"
+                    value={editData.lotSize || ""}
+                    onChange={(e) => setEditData({ ...editData, lotSize: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground uppercase">Buy Price</label>
+                  <input
+                    type="number"
+                    value={editData.buyingPrice || ""}
+                    onChange={(e) => setEditData({ ...editData, buyingPrice: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground uppercase">Sell Price</label>
+                  <input
+                    type="number"
+                    value={editData.sellingPrice || ""}
+                    onChange={(e) => setEditData({ ...editData, sellingPrice: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground uppercase">Entry Time</label>
+                  <input
+                    type="time"
+                    value={editData.entryTime || ""}
+                    onChange={(e) => setEditData({ ...editData, entryTime: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground uppercase">Exit Time</label>
+                  <input
+                    type="time"
+                    value={editData.exitTime || ""}
+                    onChange={(e) => setEditData({ ...editData, exitTime: e.target.value })}
+                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
+                  />
+                </div>
+              </div>
 
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground uppercase">Description</label>
