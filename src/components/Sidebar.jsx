@@ -4,6 +4,8 @@ import { Wallet, BarChart, History, BookOpen, Menu, X, LogOut, ChevronLeft } fro
 import { useAuth } from "../context/AuthContext";
 import profilePic from "../assets/profile-pic.png";
 
+import { Logo } from "./Logo";
+
 export function Sidebar() {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -33,13 +35,8 @@ export function Sidebar() {
         className={`fixed inset-y-0 left-0 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
           } md:relative md:translate-x-0 w-72 glass-sidebar z-40 transition-transform duration-300 ease-in-out flex flex-col`}
       >
-        <div className="p-8 flex items-center gap-3">
-          <div className="bg-primary p-2 rounded-xl shadow-lg">
-            <Wallet className="h-8 w-8 text-primary-foreground" />
-          </div>
-          <h2 className="text-2xl font-bold text-foreground font-heading">
-            =2money
-          </h2>
+        <div className="p-8 flex items-center justify-center">
+          <Logo className="h-10 w-10 text-primary" />
         </div>
 
         <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
