@@ -54,7 +54,7 @@ export function Navbar() {
           {/* Breadcrumbs or Page Title could go here (mobile mainly) */}
           <div className="flex items-center md:hidden gap-2">
             <Wallet className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg font-heading">2Money</span>
+            <span className="font-bold text-lg font-heading">Kaizen</span>
           </div>
 
           <div className="hidden md:block">

@@ -13,7 +13,7 @@ export const Logo = ({ className = "h-8 w-8", showText = true }) => {
 
             {showText && (
                 <span className="font-heading font-bold text-xl tracking-tight text-current">
-                    =2money
+                    Kaizen
                 </span>
             )}
         </div>
