@@ -1,4 +1,4 @@
-Project Link: https://income-tracker-prika-x.vercel.app/
+Project Link: https://kaizen-log.vercel.app/
 
 # Kaizen - Trading Tracker
 
