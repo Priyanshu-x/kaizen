@@ -41,24 +41,25 @@ function App() {
     <Router>
       <AuthProvider>
         <TransactionProvider>
-          <ThemeProvider>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+          <JournalProvider>
+            <ThemeProvider>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
 
-              {/* Protected Dashboard Routes */}
-              <Route element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/history" element={<History />} />
-                <Route path="/journal" element={<JournalPage />} />
-              </Route>
+                {/* Protected Dashboard Routes */}
+                <Route element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/history" element={<History />} />
+                  <Route path="/journal" element={<JournalPage />} />
+                </Route>
 
-              {/* Fallback */}
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </ThemeProvider>
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
+            </ThemeProvider>
         </TransactionProvider>
       </AuthProvider>
     </Router>
