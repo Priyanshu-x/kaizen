@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Wallet, BarChart, History, BookOpen, Menu, X, LogOut, ChevronLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import profilePic from "../assets/profile-pic.png";
+import { UserAvatar } from "./UserAvatar";
 
 import { Logo } from "./Logo";
 
@@ -64,7 +64,7 @@ export function Sidebar() {
 
         <div className="p-4 mt-auto">
           <div className="glass-card rounded-xl p-4 flex items-center gap-3">
-            <img src={profilePic} alt="Profile" className="h-10 w-10 rounded-full object-cover shadow-inner" />
+            <UserAvatar className="h-10 w-10" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{user.name || "Priyanshu"}</p>
               <p className="text-xs text-muted-foreground truncate">{user.email}</p>
