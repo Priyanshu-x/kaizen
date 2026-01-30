@@ -60,6 +60,7 @@ function App() {
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </ThemeProvider>
+          </JournalProvider>
         </TransactionProvider>
       </AuthProvider>
     </Router>
