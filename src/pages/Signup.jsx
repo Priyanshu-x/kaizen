@@ -10,7 +10,6 @@ export function Signup() {
     const [name, setName] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [loading, setLoading] = useState(false);
     const { signup, googleLogin } = useAuth();
     const navigate = useNavigate();
 

@@ -9,7 +9,6 @@ export function Login() {
   const [password, setPassword] = useState(""); // Default empty
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
   const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
