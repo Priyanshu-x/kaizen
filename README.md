@@ -19,6 +19,7 @@ A specialized, monochrome web application designed exclusively for tracking trad
 *   **React:** Frontend library for building the user interface.
 *   **Vite:** Fast, modern build tool.
 *   **Tailwind CSS:** Utility-first CSS framework for custom, responsive design.
+*   **Firebase Authentication:** Secure email/password and Google Sign-In.
 *   **Recharts:** Composable charting library for React.
 *   **Framer Motion:** For smooth animations and transitions.
 *   **Lucide React:** Beautiful, consistent icons.
@@ -36,7 +37,7 @@ A specialized, monochrome web application designed exclusively for tracking trad
 
 1.  Clone the repo
     ```bash
-    git clone https://github.com/your_username/trading-tracker.git
+    git clone https://github.com/Priyanshu-x/income-tracker-frontend
     ```
 2.  Navigate into the project directory
     ```bash
@@ -46,11 +47,26 @@ A specialized, monochrome web application designed exclusively for tracking trad
     ```bash
     npm install
     ```
-4.  Create a `.env` file in the root directory (if needed for API endpoints).
+4.  Create a `.env` file in the root directory:
+    ```
+    VITE_API_URL=http://localhost:5000
+    # Firebase Configuration
+    VITE_FIREBASE_API_KEY=your_api_key
+    VITE_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+    VITE_FIREBASE_PROJECT_ID=your_project_id
+    VITE_FIREBASE_STORAGE_BUCKET=your_project_id.firebasestorage.app
+    VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+    VITE_FIREBASE_APP_ID=your_app_id
+    ```
 5.  Run the development server
     ```bash
     npm run dev
     ```
+
+### Deployment
+This project is configured for **Vercel**.
+- The `vercel.json` file handles Single Page Application (SPA) routing, preventing 404 errors on refresh.
+- Ensure you add the environment variables in your Vercel project settings.
 
 ## Usage
 

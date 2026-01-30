@@ -28,3 +28,6 @@ dist-ssr
 .env.*
 
 .vercel
+
+# AI Context
+AI_RECONSTRUCTION_GUIDE.md
