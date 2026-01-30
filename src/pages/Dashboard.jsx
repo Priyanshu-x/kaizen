@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { StatsCard } from "../components/StatsCard";
 import { TransactionTable } from "../components/TransactionTable";
@@ -10,6 +11,27 @@ import { Wallet, TrendingUp, TrendingDown, DollarSign, Activity } from "lucide-r
 export function Dashboard() {
   const { transactions, loading, error } = useTransaction();
   const { user } = useAuth();
+  const [migrating, setMigrating] = useState(false);
+
+  const handleMigrate = async () => {
+    if (!confirm("This will move all old data to your account. Continue?")) return;
+    setMigrating(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "https://2money-backend.onrender.com"}/api/migrate`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${user.token}`
+        }
+      });
+      const data = await res.json();
+      alert(`Migration Complete!\nTransactions: ${data.transactionsUpdated}\nTrades: ${data.tradesUpdated}\nJournal: ${data.journalEntriesUpdated}`);
+      window.location.reload();
+    } catch (err) {
+      alert("Migration failed: " + err.message);
+    } finally {
+      setMigrating(false);
+    }
+  };
 
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
   const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0);
@@ -88,7 +110,6 @@ export function Dashboard() {
           >
             {migrating ? "Migrating..." : "Recover Old Data"}
           </button>
-          <AddTransactionForm />
         </div>
       </div>
       {error && (
