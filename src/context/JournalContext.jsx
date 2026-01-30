@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from './AuthContext';
 
 const JournalContext = createContext();
 
@@ -7,21 +8,28 @@ export const useJournal = () => {
 };
 
 export const JournalProvider = ({ children }) => {
+  const { user } = useAuth();
   const [journalEntries, setJournalEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = "https://2money-backend.onrender.com/api/journal-entries"; // Adjust if your backend URL is different
+  const API_BASE_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/journal-entries` : "https://2money-backend.onrender.com/api/journal-entries";
 
-  useEffect(() => {
-    fetchJournalEntries();
-  }, []);
+  const fetchJournalEntries = useCallback(async () => {
+    if (!user) {
+      setJournalEntries([]);
+      setLoading(false);
+      return;
+    }
 
-  const fetchJournalEntries = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(API_BASE_URL);
+      const res = await fetch(API_BASE_URL, {
+        headers: {
+          "Authorization": `Bearer ${user.token}`
+        }
+      });
       if (!res.ok) {
         throw new Error(`Failed to fetch journal entries: ${res.statusText}`);
       }
@@ -33,14 +41,21 @@ export const JournalProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, API_BASE_URL]);
+
+  useEffect(() => {
+    fetchJournalEntries();
+  }, [fetchJournalEntries]);
 
   const addJournalEntry = async (newEntry) => {
+    if (!user) return Promise.reject("User not authenticated");
+
     try {
       const res = await fetch(API_BASE_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`
         },
         body: JSON.stringify(newEntry),
       });
@@ -58,9 +73,14 @@ export const JournalProvider = ({ children }) => {
   };
 
   const deleteJournalEntry = async (id) => {
+    if (!user) return;
+
     try {
       const res = await fetch(`${API_BASE_URL}/${id}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${user.token}`
+        }
       });
       if (!res.ok) {
         throw new Error(`Failed to delete journal entry: ${res.statusText}`);

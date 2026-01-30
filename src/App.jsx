@@ -13,6 +13,7 @@ import { PrivateRoute } from "./components/PrivateRoute";
 import JournalPage from "./pages/JournalPage";
 import BlobCursor from "./components/BlobCursor";
 import { Chatbot } from "./components/Chatbot";
+import { JournalProvider } from "./context/JournalContext";
 
 function App() {
   function DashboardLayout() {
