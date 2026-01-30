@@ -35,7 +35,7 @@ export function Login() {
       >
         <div className="glass-card p-8 rounded-2xl shadow-xl border border-border">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-heading font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-heading font-bold text-foreground">
               Welcome Back
             </h2>
             <p className="text-muted-foreground mt-2">Login to your dashboard</p>
