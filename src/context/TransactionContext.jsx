@@ -34,7 +34,7 @@ export function TransactionProvider({ children }) {
 
   // Add a new transaction
   const addTransaction = (data) => {
-    fetch(`${API_URL}/api/transactions`, {
+    return fetch(`${API_URL}/api/transactions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -45,8 +45,12 @@ export function TransactionProvider({ children }) {
       })
       .then((newTransaction) => {
         setTransactions((prev) => [...prev, { ...newTransaction, amount: Number(newTransaction.amount) || 0, description: newTransaction.description || data.description || "", instrument: newTransaction.instrument || data.instrument || "" }]);
+        return newTransaction;
       })
-      .catch((err) => console.error("Error adding transaction:", err));
+      .catch((err) => {
+        console.error("Error adding transaction:", err);
+        throw err;
+      });
   };
 
   // Update an existing transaction

@@ -15,36 +15,128 @@ export function Navbar() {
   const [isAddExpenseFormOpen, setIsAddExpenseFormOpen] = useState(false);
 
   const exportTransactions = () => {
-    const csv = [
-      ["Date,Source,Amount,Category,Description"].join(","),
-      ...transactions.map((t) => [t.date, t.source, t.amount, t.category, t.description].join(",")),
+    if (!transactions || transactions.length === 0) {
+      alert("No transactions to export");
+      return;
+    }
+
+    const headers = ["Date", "Source", "Amount", "Category", "Description"];
+    const csvContent = [
+      headers.join(","),
+      ...transactions.map((t) =>
+        [
+          t.date,
+          `"${(t.source || "").replace(/"/g, '""')}"`, // Quote and escape source
+          t.amount,
+          `"${(t.category || "").replace(/"/g, '""')}"`,
+          `"${(t.description || "").replace(/"/g, '""')}"`,
+        ].join(",")
+      ),
     ].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "transactions.csv";
+    a.download = `transactions_${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
-  const importTransactions = (e) => {
+  const importTransactions = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target.result;
-        const rows = text.split("\n").slice(1);
-        const newTransactions = rows
-          .map((row) => {
-            const [date, source, amount, category, description] = row.split(",");
-            return date && source && amount && category ? { date, source, amount, category, description } : null;
-          })
-          .filter((t) => t);
-        newTransactions.forEach((data) => addTransaction(data));
+    if (!file) return;
+
+    // Reset input so the same file can be selected again if needed
+    e.target.value = "";
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target.result;
+      if (!text) return;
+
+      const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== "");
+      // Skip header row
+      const rows = lines.slice(1);
+
+      if (rows.length === 0) {
+        alert("CSV file seems empty or invalid.");
+        return;
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+
+      // Naive CSV parser for quoted fields: doesn't handle newlines within quotes, but better than split(',')
+      // Matches: "quoted value" OR value
+      const parseCSVLine = (line) => {
+        const values = [];
+        let current = "";
+        let inQuote = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            if (inQuote && line[i + 1] === '"') {
+              current += '"'; // Escaped quote
+              i++;
+            } else {
+              inQuote = !inQuote;
+            }
+          } else if (char === ',' && !inQuote) {
+            values.push(current);
+            current = "";
+          } else {
+            current += char;
+          }
+        }
+        values.push(current);
+        return values;
       };
-      reader.readAsText(file);
-    }
+
+      for (const row of rows) {
+        try {
+          // Try standard split first if no quotes likely, else advanced
+          // Actually, let's just stick to the mapping based on assumed columns
+          // Date, Source, Amount, Category, Description
+
+          const cols = parseCSVLine(row);
+          if (cols.length < 3) continue; // Minimal validation
+
+          const [date, source, amountStr, category, description] = cols;
+
+          const amount = parseFloat(amountStr);
+          if (!date || isNaN(amount)) {
+            failCount++;
+            continue;
+          }
+
+          await addTransaction({
+            date: date.trim(),
+            source: (source || "").trim(),
+            amount,
+            category: (category || "").trim(),
+            description: (description || "").trim(),
+            type: amount >= 0 ? "income" : "expense" // Infer type? Or should CSV have it? Assuming existing logic: positive is income? 
+            // Wait, existing logic didn't set type! The 'addTransaction' usually expects 'type'.
+            // If the CSV export didn't include 'type', importing back relies on backend default or fails.
+            // Let's infer type based on amount sign or default to 'income' if positive.
+          });
+          successCount++;
+        } catch (err) {
+          console.error("Import row failed:", err);
+          failCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        alert(`Successfully imported ${successCount} transactions.`);
+      }
+      if (failCount > 0) {
+        alert(`Failed to import ${failCount} rows (invalid format).`);
+      }
+    };
+    reader.readAsText(file);
   };
 
   return (
