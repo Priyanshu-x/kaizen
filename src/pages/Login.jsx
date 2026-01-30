@@ -124,7 +124,7 @@ export function Login() {
                 fill="#EA4335"
               />
             </svg>
-            Google
+            Continue with Google
           </button>
 
           <div className="text-center mt-6 text-sm text-muted-foreground">
