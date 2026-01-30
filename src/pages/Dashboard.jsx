@@ -80,17 +80,17 @@ export function Dashboard() {
         <h1 className="text-3xl font-bold font-heading w-fit">
           Dashboard
         </h1>
-        <p className="text-muted-foreground">
-          Welcome back, {user?.name || "Priyanshu"}. Here's your financial overview.
-        </p>
-      </div>
-
-      {loading && (
-        <div className="flex items-center justify-center p-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleMigrate}
+            disabled={migrating}
+            className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 px-4 py-2 rounded-xl transition-colors text-sm font-medium"
+          >
+            {migrating ? "Migrating..." : "Recover Old Data"}
+          </button>
+          <AddTransactionForm />
         </div>
-      )}
-
+      </div>
       {error && (
         <div className="p-4 bg-destructive/10 text-destructive rounded-xl mb-6">
           {error}
