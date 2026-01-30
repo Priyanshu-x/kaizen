@@ -1,18 +1,30 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useAuth } from "./AuthContext";
 
 const TransactionContext = createContext();
 
 export function TransactionProvider({ children }) {
+  const { user } = useAuth();
   const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true); // Add loading state
-  const [error, setError] = useState(null); // Add error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "https://2money-backend.onrender.com";
 
-  // Fetch transactions on mount
-  useEffect(() => {
+  // Fetch transactions
+  const fetchTransactions = useCallback(() => {
+    if (!user) {
+      setTransactions([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    fetch(`${API_URL}/api/transactions`)
+    fetch(`${API_URL}/api/transactions`, {
+      headers: {
+        "Authorization": `Bearer ${user.token}`
+      }
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch transactions");
         return res.json();
@@ -20,7 +32,7 @@ export function TransactionProvider({ children }) {
       .then((data) => {
         const parsedData = data.map(transaction => ({
           ...transaction,
-          amount: Number(transaction.amount) || 0 // Ensure amount is a number, default to 0 if NaN
+          amount: Number(transaction.amount) || 0
         }));
         setTransactions(parsedData);
         setError(null);
@@ -30,13 +42,22 @@ export function TransactionProvider({ children }) {
         setError("Could not load transactions. Check backend or network.");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [user, API_URL]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   // Add a new transaction
   const addTransaction = (data) => {
+    if (!user) return Promise.reject("User not authenticated");
+
     return fetch(`${API_URL}/api/transactions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${user.token}`
+      },
       body: JSON.stringify(data),
     })
       .then((res) => {
@@ -55,9 +76,14 @@ export function TransactionProvider({ children }) {
 
   // Update an existing transaction
   const updateTransaction = (id, data) => {
+    if (!user) return;
+
     fetch(`${API_URL}/api/transactions/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${user.token}`
+      },
       body: JSON.stringify(data),
     })
       .then((res) => {
@@ -74,8 +100,13 @@ export function TransactionProvider({ children }) {
 
   // Delete a transaction
   const deleteTransaction = (id) => {
+    if (!user) return;
+
     fetch(`${API_URL}/api/transactions/${id}`, {
       method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${user.token}`
+      }
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to delete transaction");

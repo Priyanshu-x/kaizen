@@ -1,28 +1,24 @@
-import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Outlet, Navigate } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
 import { Sidebar } from "./components/Sidebar";
 import { Dashboard } from "./pages/Dashboard";
 import { Analytics } from "./pages/Analytics";
 import { History } from "./pages/History";
 import { TransactionProvider } from "./context/TransactionContext";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { Login } from "./pages/Login";
+import { Signup } from "./pages/Signup";
+import { PrivateRoute } from "./components/PrivateRoute";
 import JournalPage from "./pages/JournalPage";
 import BlobCursor from "./components/BlobCursor";
 import { Chatbot } from "./components/Chatbot";
-import { useAuth } from "./context/AuthContext";
 
 function App() {
-  const ProtectedRoute = ({ children }) => {
+  function DashboardLayout() {
     const { user } = useAuth();
-    if (!user) {
-      return <Navigate to="/login" replace />;
-    }
-    return children;
-  };
+    if (!user) return <Navigate to="/login" />;
 
-  const DashboardLayout = () => {
     return (
       <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary/20 selection:text-primary">
         <BlobCursor />
@@ -38,57 +34,33 @@ function App() {
         </div>
       </div>
     );
-  };
+  }
 
   return (
-    <AuthProvider>
-      <TransactionProvider>
-        <ThemeProvider>
-          <Router>
+    <Router>
+      <AuthProvider>
+        <TransactionProvider>
+          <ThemeProvider>
             <Routes>
-              {/* Standalone Login Route */}
+              {/* Public Routes */}
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
 
               {/* Protected Dashboard Routes */}
-              <Route element={<DashboardLayout />}>
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/analytics"
-                  element={
-                    <ProtectedRoute>
-                      <Analytics />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/history"
-                  element={
-                    <ProtectedRoute>
-                      <History />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/journal"
-                  element={
-                    <ProtectedRoute>
-                      <JournalPage />
-                    </ProtectedRoute>
-                  }
-                />
+              <Route element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/history" element={<History />} />
+                <Route path="/journal" element={<JournalPage />} />
               </Route>
+
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" />} />
             </Routes>
-          </Router>
-        </ThemeProvider>
-      </TransactionProvider>
-    </AuthProvider>
+          </ThemeProvider>
+        </TransactionProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
