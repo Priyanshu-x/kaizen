@@ -11,27 +11,32 @@ const JournalEntryDisplay = ({ entry, onDelete }) => {
   );
 
   return (
-    <div className={`p-4 shadow-md rounded-lg mb-4 ${isDarkMode ? 'bg-gray-700 text-gray-100' : 'bg-white text-gray-900'}`}>
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-xl font-bold">{entry.title}</h3>
+    <div className="p-6 glass-card rounded-2xl mb-6">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-xl font-bold text-foreground font-heading">{entry.title}</h3>
+          <p className="text-sm text-muted-foreground mt-1">{entry.date}</p>
+        </div>
         <button
           onClick={() => onDelete(entry._id)}
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
+          className="bg-destructive/10 hover:bg-destructive/20 text-destructive font-medium py-1.5 px-3 rounded-lg text-sm transition-colors border border-destructive/20"
         >
           Delete
         </button>
       </div>
-      <p className={`text-sm mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{entry.date}</p>
       {linkedTransactions.length > 0 && (
-        <div className="mt-4">
-          <h4 className="text-lg font-semibold mb-2">Linked Trades/Income:</h4>
-          <ul className="list-disc list-inside">
+        <div className="mt-4 p-4 rounded-xl bg-secondary/20 border border-white/5">
+          <h4 className="text-sm font-semibold mb-2 text-foreground">Linked Trades/Income:</h4>
+          <ul className="space-y-2">
             {linkedTransactions.map(transaction => (
-              <li key={transaction._id} className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'} text-sm mb-1`}>
-                <span className="font-medium">{new Date(transaction.date).toLocaleDateString()}</span> -
-                <span className="font-medium"> {transaction.instrument || 'N/A'}</span>:
-                <span className={`${transaction.amount >= 0 ? 'text-green-500' : 'text-red-500'} font-semibold`}> ₹{transaction.amount}</span> -
-                {transaction.description}
+              <li key={transaction._id} className="text-sm text-muted-foreground flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></span>
+                <span className="font-mono text-xs opacity-70">{new Date(transaction.date).toLocaleDateString()}</span>
+                <span className="font-medium text-foreground"> {transaction.instrument || 'N/A'}</span>
+                <span className={`${transaction.amount >= 0 ? 'text-green-500' : 'text-red-500'} font-semibold`}>
+                  {transaction.amount >= 0 ? '+' : ''}₹{transaction.amount}
+                </span>
+                <span className="opacity-80">- {transaction.description}</span>
               </li>
             ))}
           </ul>

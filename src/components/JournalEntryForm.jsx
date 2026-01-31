@@ -59,25 +59,28 @@ const JournalEntryForm = () => {
     'link', 'image'
   ];
 
+  const inputClasses = "w-full p-3 rounded-xl bg-secondary/30 border border-transparent focus:border-black/50 dark:focus:border-white/50 focus:ring-0 transition-all outline-none";
+  const labelClasses = "block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 ml-1";
+
   return (
-    <form onSubmit={handleSubmit} className={`p-4 shadow-md rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+    <form onSubmit={handleSubmit} className="p-6 glass-card rounded-2xl">
       <div className="mb-4">
-        <label htmlFor="title" className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Title:</label>
+        <label htmlFor="title" className={labelClasses}>Title:</label>
         <input
           type="text"
           id="title"
-          className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${isDarkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : 'text-gray-700 border-gray-300'}`}
+          className={inputClasses}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
       </div>
       <div className="mb-4">
-        <label htmlFor="date" className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Date:</label>
+        <label htmlFor="date" className={labelClasses}>Date:</label>
         <input
           type="date"
           id="date"
-          className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${isDarkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : 'text-gray-700 border-gray-300'}`}
+          className={inputClasses}
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
@@ -85,13 +88,13 @@ const JournalEntryForm = () => {
       </div>
 
       <div className="mb-4">
-        <label htmlFor="tradeDate" className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+        <label htmlFor="tradeDate" className={labelClasses}>
           Select Trade Date:
         </label>
         <input
           type="date"
           id="tradeDate"
-          className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${isDarkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : 'text-gray-700 border-gray-300'}`}
+          className={inputClasses}
           value={selectedTradeDate}
           onChange={(e) => {
             setSelectedTradeDate(e.target.value);
@@ -102,18 +105,18 @@ const JournalEntryForm = () => {
 
       {selectedTradeDate && (
         <div className="mb-4">
-          <label htmlFor="linkedTransactions" className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          <label htmlFor="linkedTransactions" className={labelClasses}>
             Trades for {selectedTradeDate}:
           </label>
           {loading ? (
-            <p>Loading transactions...</p>
+            <p className="text-sm text-muted-foreground">Loading transactions...</p>
           ) : error ? (
-            <p className="text-red-500">{error}</p>
+            <p className="text-red-500 text-sm">{error}</p>
           ) : (
             <select
               id="linkedTransactions"
               multiple
-              className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${isDarkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : 'text-gray-700 border-gray-300'}`}
+              className={`${inputClasses} h-32`}
               value={linkedTransactionIds}
               onChange={(e) =>
                 setLinkedTransactionIds(
@@ -133,7 +136,7 @@ const JournalEntryForm = () => {
                 ))}
             </select>
           )}
-          <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className="text-xs mt-1 text-muted-foreground">
             Hold Ctrl (or Cmd on Mac) to select multiple items.
           </p>
         </div>
@@ -143,40 +146,42 @@ const JournalEntryForm = () => {
         <input
           type="checkbox"
           id="toggleReflection"
-          className="mr-2 leading-tight"
+          className="mr-2 h-4 w-4 bg-transparent border-muted-foreground/30 rounded focus:ring-0 checked:bg-white checked:border-white"
           checked={showReflectionQuestions}
           onChange={() => setShowReflectionQuestions(!showReflectionQuestions)}
         />
-        <label htmlFor="toggleReflection" className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+        <label htmlFor="toggleReflection" className="text-sm font-medium text-foreground">
           Show Reflection Questions
         </label>
       </div>
 
       {showReflectionQuestions && (
-        <div className={`mb-4 p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-          <h3 className="text-md font-bold mb-2">Reflection Prompts:</h3>
-          <ul className="list-disc list-inside">
+        <div className="mb-4 p-4 rounded-xl bg-secondary/20 border border-white/5">
+          <h3 className="text-md font-bold mb-2 text-foreground">Reflection Prompts:</h3>
+          <ul className="list-disc list-inside space-y-1">
             {reflectionQuestions.map((question, index) => (
-              <li key={index} className={`${isDarkMode ? 'text-gray-300' : 'text-gray-700'} text-sm mb-1`}>{question}</li>
+              <li key={index} className="text-muted-foreground text-sm">{question}</li>
             ))}
           </ul>
         </div>
       )}
 
-      <div className="mb-4">
-        <label className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Content:</label>
-        <ReactQuill
-          theme="snow"
-          value={content}
-          onChange={setContent}
-          modules={modules}
-          formats={formats}
-          className={`${isDarkMode ? 'bg-gray-700 text-gray-100' : 'bg-white'}`}
-        />
+      <div className="mb-6">
+        <label className={labelClasses}>Content:</label>
+        <div className="rounded-xl overflow-hidden border border-white/10">
+          <ReactQuill
+            theme="snow"
+            value={content}
+            onChange={setContent}
+            modules={modules}
+            formats={formats}
+            className="text-foreground bg-transparent"
+          />
+        </div>
       </div>
       <button
         type="submit"
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        className="w-full bg-white text-black hover:bg-gray-200 dark:bg-white dark:text-black font-bold py-3 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-white/10"
       >
         Save Entry
       </button>

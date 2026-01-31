@@ -79,8 +79,8 @@ export function Analytics() {
   }
 
   return (
-    <div className="p-6 dark:bg-gray-900 dark:text-white min-h-screen">
-      <h2 className="text-2xl font-bold mb-6 dark:text-white">Analytics</h2>
+    <div className="p-6 bg-background text-foreground min-h-screen">
+      <h2 className="text-2xl font-bold mb-6 font-heading">Analytics</h2>
 
       {/* Daily P&L Chart */}
       <div className="mb-8 glass-card p-6 rounded-2xl border border-white/10">
