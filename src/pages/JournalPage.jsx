@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import JournalEntryForm from '../components/JournalEntryForm.jsx';
 import JournalEntryDisplay from '../components/JournalEntryDisplay.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
+import { Skeleton } from "../components/ui/Skeleton";
 import { useJournal } from '../context/JournalContext.jsx';
 
 const JournalPage = () => {
@@ -27,7 +28,11 @@ const JournalPage = () => {
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">My Entries</h2>
         {loading ? (
-          <p>Loading journal entries...</p>
+          <div className="space-y-4">
+            <Skeleton className="h-40 w-full rounded-2xl opacity-50" />
+            <Skeleton className="h-40 w-full rounded-2xl opacity-40" />
+            <Skeleton className="h-40 w-full rounded-2xl opacity-30" />
+          </div>
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : journalEntries.length === 0 ? (

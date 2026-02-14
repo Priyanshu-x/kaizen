@@ -6,6 +6,7 @@ import { MonthlyTrendChart } from "../components/MonthlyTrendchart";
 import { useTransaction } from "../context/TransactionContext";
 import { useAuth } from "../context/AuthContext";
 import { Wallet, TrendingUp, TrendingDown, DollarSign, Activity } from "lucide-react";
+import { Skeleton } from "../components/ui/Skeleton";
 
 export function Dashboard() {
   const { transactions, loading, error } = useTransaction();
@@ -105,6 +106,7 @@ export function Dashboard() {
                 value={stat.value}
                 trend={stat.trend}
                 icon={stat.icon}
+                loading={loading}
               />
             </motion.div>
           ))}
@@ -113,16 +115,31 @@ export function Dashboard() {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div variants={item}>
-            <ProfitLossChart transactions={transactions} />
+            {loading ? (
+              <Skeleton className="h-[400px] w-full rounded-2xl" />
+            ) : (
+              <ProfitLossChart transactions={transactions} />
+            )}
           </motion.div>
           <motion.div variants={item}>
-            <MonthlyTrendChart entries={transactions} />
+            {loading ? (
+              <Skeleton className="h-[400px] w-full rounded-2xl" />
+            ) : (
+              <MonthlyTrendChart entries={transactions} />
+            )}
           </motion.div>
         </div>
 
         {/* Transactions Section */}
         <motion.div variants={item}>
-          <TransactionTable />
+          {loading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-48 mb-4" />
+              <Skeleton className="h-[300px] w-full rounded-2xl" />
+            </div>
+          ) : (
+            <TransactionTable />
+          )}
         </motion.div>
       </motion.div>
     </div>

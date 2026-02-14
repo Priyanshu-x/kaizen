@@ -15,6 +15,16 @@ import BlobCursor from "./components/BlobCursor";
 import { Chatbot } from "./components/Chatbot";
 import { JournalProvider } from "./context/JournalContext";
 
+// Wrapper to force remount of TransactionProvider when user changes
+function TransactionProviderWrapper({ children }) {
+  const { user } = useAuth();
+  return (
+    <TransactionProvider key={user?.uid || 'guest'}>
+      {children}
+    </TransactionProvider>
+  );
+}
+
 function App() {
   function DashboardLayout() {
     const { user } = useAuth();
@@ -40,7 +50,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <TransactionProvider>
+        <TransactionProviderWrapper>
           <JournalProvider>
             <ThemeProvider>
               <Routes>
@@ -61,7 +71,7 @@ function App() {
               </Routes>
             </ThemeProvider>
           </JournalProvider>
-        </TransactionProvider>
+        </TransactionProviderWrapper>
       </AuthProvider>
     </Router>
   );

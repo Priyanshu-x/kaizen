@@ -1,6 +1,6 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
 
-export function StatsCard({ title, value, trend, icon: Icon }) {
+export function StatsCard({ title, value, trend, icon: Icon, loading }) {
   const isPositive = trend >= 0;
 
   return (
@@ -13,7 +13,11 @@ export function StatsCard({ title, value, trend, icon: Icon }) {
           <div>
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <h3 className="text-3xl font-bold mt-1 tracking-tight">
-              {typeof value === 'number' ? `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : value}
+              {loading ? (
+                <div className="h-9 w-32 bg-secondary/50 rounded-lg animate-pulse" />
+              ) : (
+                typeof value === 'number' ? `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : value
+              )}
             </h3>
           </div>
           <div className="p-3 rounded-xl bg-primary text-primary-foreground shadow-lg">

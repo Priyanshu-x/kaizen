@@ -12,6 +12,7 @@ A specialized, monochrome web application designed exclusively for tracking trad
 *   **Focused Analytics:** Visualization of functionality including Net Balance Trend and Profit & Loss Over Time.
 *   **Transaction History:** Searchable and filterable list of all trading activities.
 *   **Journal:** Integrated journal to record trading notes, psychology, and daily logs.
+*   **Premium UX:** Smooth loading states with custom "Kaizen" logo animations and Skeleton UI to prevent layout shifts.
 *   **Secure Authentication:** User login and registration to keep your financial data private.
 
 ## Technologies Used

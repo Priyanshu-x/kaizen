@@ -1,12 +1,13 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
 import { MonthlyNetBalanceChart } from "../components/MonthlyNetBalanceChart";
+import { Skeleton } from "../components/ui/Skeleton";
 import { getMonthlyNetBalances } from "../utils/transactionUtils";
 import { useTransaction } from "../context/TransactionContext";
 import { useMemo } from "react";
 import { useTheme } from "../context/ThemeContext";
 
 export function Analytics() {
-  const { transactions } = useTransaction();
+  const { transactions, loading } = useTransaction();
   const { isDarkMode } = useTheme();
 
   const textColor = isDarkMode ? "#E0E0E0" : "#333333";
@@ -67,6 +68,19 @@ export function Analytics() {
   }, [transactions]);
 
   const monthlyNetBalances = getMonthlyNetBalances(transactions);
+
+  if (loading) {
+    return (
+      <div className="p-6 bg-background text-foreground min-h-screen">
+        <h2 className="text-2xl font-bold mb-6 font-heading">Analytics</h2>
+        <div className="space-y-8">
+          <Skeleton className="h-[400px] w-full rounded-2xl" />
+          <Skeleton className="h-[350px] w-full rounded-2xl" />
+          <Skeleton className="h-[200px] w-full rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   // Empty state
   if (transactions.length === 0 || !transactions.every((t) => t.date && t.amount && t.category && t.type)) {
