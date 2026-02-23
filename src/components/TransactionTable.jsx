@@ -11,6 +11,7 @@ export function TransactionTable({ transactions: propTransactions }) {
   const [sortDirection, setSortDirection] = useState("asc");
   const [editingIndex, setEditingIndex] = useState(null);
   const [editData, setEditData] = useState({ date: "", source: "", amount: "", category: "", description: "", type: "" });
+  const [searchTerm, setSearchTerm] = useState("");
 
 
 
@@ -23,7 +24,18 @@ export function TransactionTable({ transactions: propTransactions }) {
     }
   };
 
-  const sortedTransactions = [...transactions].sort((a, b) => {
+  const filteredTransactions = transactions.filter((t) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      (t.instrument?.toLowerCase() || "").includes(searchLower) ||
+      (t.source?.toLowerCase() || "").includes(searchLower) ||
+      (t.description?.toLowerCase() || "").includes(searchLower) ||
+      (t.date?.toLowerCase() || "").includes(searchLower) ||
+      (t.category?.toLowerCase() || "").includes(searchLower)
+    );
+  });
+
+  const sortedTransactions = [...filteredTransactions].sort((a, b) => {
     if (!sortColumn) {
       // Default Sort: Date DESC, then Entry Time DESC
       const dateA = new Date(a.date);
@@ -88,6 +100,8 @@ export function TransactionTable({ transactions: propTransactions }) {
               <input
                 type="text"
                 placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9 pr-4 py-2 bg-secondary/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all border-none"
               />
             </div>
