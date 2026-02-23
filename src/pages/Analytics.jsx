@@ -140,7 +140,7 @@ export function Analytics() {
       </div>
 
       <div className="mb-8 glass-card p-6 rounded-2xl border border-white/10">
-        <h3 className="text-xl font-semibold mb-4 dark:text-white">Monthly Income vs Expense</h3>
+        <h3 className="text-xl font-bold mb-4 font-heading">Monthly Profit vs Loss</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={pnlTimeData}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} opacity={0.5} />
