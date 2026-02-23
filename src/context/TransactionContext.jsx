@@ -32,7 +32,8 @@ export function TransactionProvider({ children }) {
       .then((data) => {
         const parsedData = data.map(transaction => ({
           ...transaction,
-          amount: Number(transaction.amount) || 0
+          amount: Number(transaction.amount) || 0,
+          tax: Number(transaction.tax) || 0
         }));
         setTransactions(parsedData);
         setError(null);
@@ -65,7 +66,13 @@ export function TransactionProvider({ children }) {
         return res.json();
       })
       .then((newTransaction) => {
-        setTransactions((prev) => [...prev, { ...newTransaction, amount: Number(newTransaction.amount) || 0, description: newTransaction.description || data.description || "", instrument: newTransaction.instrument || data.instrument || "" }]);
+        setTransactions((prev) => [...prev, {
+          ...newTransaction,
+          amount: Number(newTransaction.amount) || 0,
+          tax: Number(newTransaction.tax) || 0,
+          description: newTransaction.description || data.description || "",
+          instrument: newTransaction.instrument || data.instrument || ""
+        }]);
         return newTransaction;
       })
       .catch((err) => {
@@ -92,7 +99,13 @@ export function TransactionProvider({ children }) {
       })
       .then((updatedTransaction) => {
         setTransactions((prev) =>
-          prev.map((t) => (t._id === updatedTransaction._id ? { ...updatedTransaction, amount: Number(updatedTransaction.amount) || 0, description: updatedTransaction.description || data.description || "", instrument: updatedTransaction.instrument || data.instrument || "" } : t))
+          prev.map((t) => (t._id === updatedTransaction._id ? {
+            ...updatedTransaction,
+            amount: Number(updatedTransaction.amount) || 0,
+            tax: Number(updatedTransaction.tax) || 0,
+            description: updatedTransaction.description || data.description || "",
+            instrument: updatedTransaction.instrument || data.instrument || ""
+          } : t))
         );
       })
       .catch((err) => console.error("Error updating transaction:", err));

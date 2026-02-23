@@ -10,9 +10,9 @@ export const getMonthlyNetBalances = (transactions) => {
     }
 
     if (transaction.type === 'income') {
-      monthlyData[yearMonth].income += Number(transaction.amount);
+      monthlyData[yearMonth].income += (Number(transaction.amount) - (Number(transaction.tax) || 0));
     } else if (transaction.type === 'expense') {
-      monthlyData[yearMonth].expense += Number(transaction.amount);
+      monthlyData[yearMonth].expense += (Number(transaction.amount) - (Number(transaction.tax) || 0));
     }
   });
 

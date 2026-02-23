@@ -41,6 +41,7 @@ export function AddIncomeForm({ onAdd, onClose }) {
     onAdd({
       ...formData,
       amount: Number(formData.amount),
+      tax: Number(formData.tax || 0),
       date: formData.date,
       description: formData.description,
       type: "income"

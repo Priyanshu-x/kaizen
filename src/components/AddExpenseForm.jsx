@@ -41,6 +41,7 @@ const AddExpenseForm = ({ onClose }) => {
       id: Date.now(),
       ...formData,
       amount: -Math.abs(parseFloat(formData.amount)), // Ensure amount is negative
+      tax: Math.abs(parseFloat(formData.tax || 0)),
       type: 'expense',
     };
 
@@ -65,7 +66,7 @@ const AddExpenseForm = ({ onClose }) => {
             <h2 className="text-2xl font-bold font-heading bg-gradient-to-r from-red-500 to-red-600/60 bg-clip-text text-transparent">
               Log Trading Loss
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">Record your trading expenses</p>
+            <p className="text-sm text-muted-foreground mt-1">Record your trading loss</p>
           </div>
           <button
             onClick={onClose}

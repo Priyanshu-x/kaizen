@@ -131,7 +131,7 @@ export function TransactionTable() {
           <table className="w-full">
             <thead className="bg-secondary/30">
               <tr>
-                {["Date", "Instrument", "Lot Size", "Buy", "Sell", "Entry", "Exit", "Charges", "Rules", "P&L", "Actions"].map((header) => (
+                {["Date", "Instrument", "Lot Size", "Buy", "Sell", "Entry", "Exit", "Charges", "Rules", "Net P&L", "Actions"].map((header) => (
                   <th
                     key={header}
                     className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-primary transition-colors whitespace-nowrap"
@@ -139,7 +139,7 @@ export function TransactionTable() {
                       const keyMap = {
                         "Date": "date", "Instrument": "instrument", "Lot Size": "lotSize",
                         "Buy": "buyingPrice", "Sell": "sellingPrice",
-                        "Entry": "entryTime", "Exit": "exitTime", "Charges": "tax", "Rules": "ruleFollowed", "P&L": "amount"
+                        "Entry": "entryTime", "Exit": "exitTime", "Charges": "tax", "Rules": "ruleFollowed", "Net P&L": "amount"
                       };
                       header !== "Actions" && handleSort(keyMap[header] || header.toLowerCase());
                     }}
@@ -170,8 +170,8 @@ export function TransactionTable() {
                       );
                     })()}
                   </td>
-                  <td className={`px-4 py-3 whitespace-nowrap text-sm font-bold tracking-tight ${t.amount >= 0 ? "text-green-500" : "text-red-500"}`}>
-                    {t.amount >= 0 ? "+" : "-"}₹{Math.abs(Number(t.amount)).toFixed(2)}
+                  <td className={`px-4 py-3 whitespace-nowrap text-sm font-bold tracking-tight ${(Number(t.amount) - (Number(t.tax) || 0)) >= 0 ? "text-green-500" : "text-red-500"}`}>
+                    {(Number(t.amount) - (Number(t.tax) || 0)) >= 0 ? "+" : "-"}₹{Math.abs(Number(t.amount) - (Number(t.tax) || 0)).toFixed(2)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm">
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

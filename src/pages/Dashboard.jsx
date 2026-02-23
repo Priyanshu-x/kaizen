@@ -12,9 +12,11 @@ export function Dashboard() {
   const { transactions, loading, error } = useTransaction();
   const { user } = useAuth();
 
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
-  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0);
-  const netBalance = totalIncome - Math.abs(totalExpenses); // distinct expenses are usually negative or positive depending on storage, assuming stored as positive based on previous code.
+  // Calculate Net Profit (Gross - Tax)
+  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + (Number(t.amount) - (Number(t.tax) || 0)), 0);
+  // For expenses, amount is already negative, so we subtract tax (adding a bigger negative) to get Total Loss
+  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) - (Number(t.tax) || 0)), 0);
+  const netBalance = totalIncome + totalExpenses; // Since totalExpenses is negative, addition works.
   // Actually previous code: totalExpenses = ... reduce((sum, t) => sum + Number(t.amount), 0).
   // Expenses might be stored as positive numbers with type='expense'.
 
@@ -27,11 +29,13 @@ export function Dashboard() {
 
   const thisMonthIncome = thisMonthTransactions
     .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+    .reduce((sum, t) => sum + (Number(t.amount) - (Number(t.tax) || 0)), 0);
 
   const thisMonthExpenses = thisMonthTransactions
     .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+    .reduce((sum, t) => sum + (Number(t.amount) - (Number(t.tax) || 0)), 0);
+
+  const thisMonthSavings = thisMonthIncome + thisMonthExpenses;
 
   const stats = [
     {
@@ -54,7 +58,7 @@ export function Dashboard() {
     },
     {
       title: "Monthly Savings",
-      value: thisMonthIncome + thisMonthExpenses,
+      value: thisMonthSavings,
       trend: 2.1,
       icon: DollarSign
     },
