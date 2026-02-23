@@ -7,7 +7,7 @@ const CustomTooltip = ({ active, payload, label }) => {
       <div className="glass-card p-3 rounded-xl border border-border/50 shadow-xl">
         <p className="font-semibold text-sm mb-1">{label}</p>
         <p className="text-primary font-bold">
-          ₹{Number(payload[0].value).toFixed(2)}
+          Net P&L: ₹{Number(payload[0].value).toFixed(2)}
         </p>
       </div>
     );
@@ -17,11 +17,13 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export function MonthlyTrendChart({ entries }) {
   const monthlyData = entries.reduce((acc, entry) => {
-    // Basic aggregation by Month-Year to avoid collision across years
     const date = new Date(entry.date);
     const month = date.toLocaleString('default', { month: 'short', year: '2-digit' });
+    const amount = Number(entry.amount) || 0;
+    const tax = Number(entry.tax) || 0;
+
     if (!acc[month]) acc[month] = 0;
-    acc[month] += Number(entry.amount) || 0;
+    acc[month] += (amount - tax);
     return acc;
   }, {});
 
@@ -30,7 +32,7 @@ export function MonthlyTrendChart({ entries }) {
   return (
     <Card className="glass-card border-border/50 shadow-md">
       <CardHeader>
-        <CardTitle>Monthly Income Trend</CardTitle>
+        <CardTitle>Monthly Net P&L Trend</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">

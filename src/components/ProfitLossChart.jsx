@@ -18,16 +18,17 @@ export function ProfitLossChart({ transactions }) {
             const monthYear = `${date.toLocaleString("default", { month: "short" })} ${date.getFullYear()}`;
             // Handle amount parsing safely
             const amount = Number(t.amount) || 0;
+            const tax = Number(t.tax) || 0;
+            const netAmount = amount - tax;
 
             if (!monthMap[monthYear]) {
                 monthMap[monthYear] = { income: 0, expense: 0 };
             }
 
-            if (t.type === "income" && amount > 0) {
-                monthMap[monthYear].income += amount;
+            if (t.type === "income") {
+                monthMap[monthYear].income += netAmount;
             } else if (t.type === "expense") {
-                // Expenses are stored as positive numbers usually, but let's handle if they are negative
-                monthMap[monthYear].expense += Math.abs(amount);
+                monthMap[monthYear].expense += Math.abs(netAmount);
             }
         });
 

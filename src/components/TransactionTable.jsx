@@ -4,8 +4,9 @@ import { Edit2, Trash2, Search, Filter } from "lucide-react";
 import { RuleBadge } from "./RuleBadge";
 import { EditTransactionModal } from "./EditTransactionModal";
 
-export function TransactionTable() {
-  const { transactions, updateTransaction, deleteTransaction } = useTransaction();
+export function TransactionTable({ transactions: propTransactions }) {
+  const { transactions: contextTransactions, updateTransaction, deleteTransaction } = useTransaction();
+  const transactions = propTransactions || contextTransactions;
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [editingIndex, setEditingIndex] = useState(null);
