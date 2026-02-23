@@ -1,40 +1,31 @@
 import { useState } from "react";
+import Papa from "papaparse";
 import { Link } from "react-router-dom";
 import { Wallet, Sun, Moon, UserCircle, Plus, FileSpreadsheet, LogOut, Download, Upload } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useTransaction } from "../context/TransactionContext";
-import { AddIncomeForm } from "./AddIncomeForm";
-import AddExpenseForm from "./AddExpenseForm";
+import { TradeForm } from "./TradeForm";
 
 export function Navbar() {
   const { isDarkMode, toggleDarkMode } = useTheme();
   const { user, logout } = useAuth();
   const { transactions, addTransaction } = useTransaction();
-  const [isAddIncomeFormOpen, setIsAddIncomeFormOpen] = useState(false);
-  const [isAddExpenseFormOpen, setIsAddExpenseFormOpen] = useState(false);
+  const [isTradeFormOpen, setIsTradeFormOpen] = useState(false);
+  const [tradeType, setTradeType] = useState("income");
+
+  const openTradeForm = (type) => {
+    setTradeType(type);
+    setIsTradeFormOpen(true);
+  };
 
   const exportTransactions = () => {
     if (!transactions || transactions.length === 0) {
       alert("No transactions to export");
       return;
     }
-
-    const headers = ["Date", "Source", "Amount", "Category", "Description"];
-    const csvContent = [
-      headers.join(","),
-      ...transactions.map((t) =>
-        [
-          t.date,
-          `"${(t.source || "").replace(/"/g, '""')}"`, // Quote and escape source
-          t.amount,
-          `"${(t.category || "").replace(/"/g, '""')}"`,
-          `"${(t.description || "").replace(/"/g, '""')}"`,
-        ].join(",")
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const csv = Papa.unparse(transactions);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -158,18 +149,18 @@ export function Navbar() {
               <>
                 <div className="flex items-center gap-2 mr-2">
                   <button
-                    onClick={() => setIsAddIncomeFormOpen(true)}
+                    onClick={() => openTradeForm("income")}
                     className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:shadow-lg transition-all duration-300 font-medium text-sm border border-primary/20"
                   >
                     <Plus className="h-4 w-4" />
-                    <span>Income</span>
+                    <span>Profit</span>
                   </button>
                   <button
-                    onClick={() => setIsAddExpenseFormOpen(true)}
+                    onClick={() => openTradeForm("expense")}
                     className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-xl hover:bg-secondary/80 transition-all duration-300 font-medium text-sm border border-secondary"
                   >
                     <Plus className="h-4 w-4" />
-                    <span>Expense</span>
+                    <span>Loss</span>
                   </button>
                 </div>
 
@@ -218,15 +209,9 @@ export function Navbar() {
         </div>
       </nav>
 
-      {isAddIncomeFormOpen && (
+      {isTradeFormOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4">
-          <AddIncomeForm onAdd={addTransaction} onClose={() => setIsAddIncomeFormOpen(false)} />
-        </div>
-      )}
-
-      {isAddExpenseFormOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full flex justify-center items-center z-50 p-4">
-          <AddExpenseForm onClose={() => setIsAddExpenseFormOpen(false)} />
+          <TradeForm type={tradeType} onClose={() => setIsTradeFormOpen(false)} />
         </div>
       )}
     </>

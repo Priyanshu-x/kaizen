@@ -17,17 +17,13 @@ export function Analytics() {
   const dailyPnLData = useMemo(() => {
     const dailyMap = {};
     transactions.forEach((t) => {
-      if (!t.date || !t.amount) return;
-      const dateKey = t.date; // Assuming YYYY-MM-DD format from input
-
-      const amount = parseFloat(String(t.amount).replace(/[^0-9.-]+/g, ""));
+      const amount = Number(t.amount) || 0;
       const tax = Number(t.tax) || 0;
       const netAmount = amount - tax;
+      const dateKey = t.date;
 
-      if (!isNaN(netAmount)) {
-        if (!dailyMap[dateKey]) {
-          dailyMap[dateKey] = 0;
-        }
+      if (dateKey) {
+        if (!dailyMap[dateKey]) dailyMap[dateKey] = 0;
         dailyMap[dateKey] += netAmount;
       }
     });
@@ -47,20 +43,20 @@ export function Analytics() {
     transactions.forEach((t) => {
       const date = new Date(t.date);
       if (isNaN(date.getTime())) return;
+
       const monthYear = `${date.toLocaleString("default", { month: "short" })} ${date.getFullYear()}`;
-      const amount = parseFloat(String(t.amount || "0").replace("₹", ""));
+      const amount = Number(t.amount) || 0;
       const tax = Number(t.tax) || 0;
       const netAmount = amount - tax;
 
-      if (!isNaN(netAmount)) {
-        if (!monthMap[monthYear]) {
-          monthMap[monthYear] = { income: 0, expense: 0 };
-        }
-        if (t.type === "income" && netAmount > 0) {
-          monthMap[monthYear].income += netAmount;
-        } else if (t.type === "expense" && netAmount < 0) {
-          monthMap[monthYear].expense += Math.abs(netAmount);
-        }
+      if (!monthMap[monthYear]) {
+        monthMap[monthYear] = { income: 0, expense: 0 };
+      }
+
+      if (t.type === "income") {
+        monthMap[monthYear].income += netAmount;
+      } else {
+        monthMap[monthYear].expense += Math.abs(netAmount);
       }
     });
 

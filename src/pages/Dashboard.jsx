@@ -5,62 +5,47 @@ import { ProfitLossChart } from "../components/ProfitLossChart";
 import { MonthlyTrendChart } from "../components/MonthlyTrendchart";
 import { useTransaction } from "../context/TransactionContext";
 import { useAuth } from "../context/AuthContext";
-import { Wallet, TrendingUp, TrendingDown, DollarSign, Activity } from "lucide-react";
+import { Wallet, TrendingUp, TrendingDown, DollarSign, Activity, IndianRupee } from "lucide-react";
 import { Skeleton } from "../components/ui/Skeleton";
+import { useTradePerformance } from "../hooks/useTradePerformance";
 
 export function Dashboard() {
   const { transactions, loading, error } = useTransaction();
   const { user } = useAuth();
 
-  // Calculate Net Profit (Gross - Tax)
-  const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + (Number(t.amount) - (Number(t.tax) || 0)), 0);
-  // For expenses, amount is already negative, so we subtract tax (adding a bigger negative) to get Total Loss
-  const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + (Number(t.amount) - (Number(t.tax) || 0)), 0);
-  const netBalance = totalIncome + totalExpenses; // Since totalExpenses is negative, addition works.
-  // Actually previous code: totalExpenses = ... reduce((sum, t) => sum + Number(t.amount), 0).
-  // Expenses might be stored as positive numbers with type='expense'.
-
+  const { totalNet } = useTradePerformance(transactions);
   const currentMonth = new Date().toLocaleString('default', { month: 'short' });
 
-  // Calculate this month's stats
   const thisMonthTransactions = transactions.filter(t =>
     new Date(t.date).toLocaleString('default', { month: 'short' }) === currentMonth
   );
 
-  const thisMonthIncome = thisMonthTransactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + (Number(t.amount) - (Number(t.tax) || 0)), 0);
-
-  const thisMonthExpenses = thisMonthTransactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + (Number(t.amount) - (Number(t.tax) || 0)), 0);
-
-  const thisMonthSavings = thisMonthIncome + thisMonthExpenses;
+  const { incomeTotal, expenseTotal, totalNet: monthlySavings } = useTradePerformance(thisMonthTransactions);
 
   const stats = [
     {
       title: "Total Balance",
-      value: netBalance,
+      value: totalNet,
       trend: 12.5,
       icon: Wallet
     },
     {
-      title: "Monthly Income",
-      value: thisMonthIncome,
+      title: "Monthly Profit",
+      value: incomeTotal,
       trend: 8.2,
       icon: TrendingUp
     },
     {
-      title: "Monthly Expenses",
-      value: thisMonthExpenses,
+      title: "Monthly Losses",
+      value: expenseTotal,
       trend: -5.4,
       icon: TrendingDown
     },
     {
       title: "Monthly Savings",
-      value: thisMonthSavings,
+      value: monthlySavings,
       trend: 2.1,
-      icon: DollarSign
+      icon: IndianRupee
     },
   ];
 

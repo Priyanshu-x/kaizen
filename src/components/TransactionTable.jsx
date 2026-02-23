@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTransaction } from "../context/TransactionContext";
-import { Edit2, Trash2, ArrowUpCircle, ArrowDownCircle, Search, Filter, CheckCircle, AlertTriangle } from "lucide-react";
+import { Edit2, Trash2, Search, Filter } from "lucide-react";
+import { RuleBadge } from "./RuleBadge";
+import { EditTransactionModal } from "./EditTransactionModal";
 
 export function TransactionTable() {
   const { transactions, updateTransaction, deleteTransaction } = useTransaction();
@@ -9,32 +11,7 @@ export function TransactionTable() {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editData, setEditData] = useState({ date: "", source: "", amount: "", category: "", description: "", type: "" });
 
-  const getRuleStatus = (transaction) => {
-    // 1. Find all trades for this specific date
-    const sameDayTrades = transactions.filter(t => t.date === transaction.date);
 
-    // 2. Sort them by time (Entry Time) to determine order
-    sameDayTrades.sort((a, b) => {
-      const timeA = a.entryTime || "00:00";
-      const timeB = b.entryTime || "00:00";
-      return timeA.localeCompare(timeB);
-    });
-
-    const index = sameDayTrades.findIndex(t => t._id === transaction._id);
-
-    // Rule 1: Max 2 Trades per day
-    if (index >= 2) return { followed: false, reason: "Violation: Max 2 trades/day limit exceeded" };
-
-    // Rule 2: If 1st trade is a Loss, stop trading
-    if (index > 0) {
-      const firstTrade = sameDayTrades[0];
-      if (firstTrade.type === "expense") {
-        return { followed: false, reason: "Violation: First trade was a loss. Stop trading." };
-      }
-    }
-
-    return { followed: true, reason: "Rules followed" };
-  };
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -86,17 +63,9 @@ export function TransactionTable() {
     }
   };
 
-  const handleSaveEdit = () => {
-    if (editingIndex !== null) {
-      const updatedTransaction = {
-        ...editData,
-        amount: Number(editData.amount.replace(/[$₹]/g, "")),
-        tax: Number(editData.tax || 0),
-      };
-      updateTransaction(editingIndex, updatedTransaction);
-      setEditingIndex(null);
-      setEditData({ date: "", source: "", amount: "", category: "", description: "" });
-    }
+  const handleSaveEdit = (id, updatedData) => {
+    updateTransaction(id, updatedData);
+    setEditingIndex(null);
   };
 
   const handleCancelEdit = () => {
@@ -160,15 +129,8 @@ export function TransactionTable() {
                   <td className="px-4 py-3 whitespace-nowrap text-sm">{t.entryTime || "—"}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm">{t.exitTime || "—"}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-red-500/80">{t.tax ? `₹${t.tax}` : "—"}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {(() => {
-                      const status = getRuleStatus(t);
-                      return status.followed ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" title={status.reason} />
-                      ) : (
-                        <AlertTriangle className="h-4 w-4 text-yellow-500" title={status.reason} />
-                      );
-                    })()}
+                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                    <RuleBadge transaction={t} allTransactions={transactions} />
                   </td>
                   <td className={`px-4 py-3 whitespace-nowrap text-sm font-bold tracking-tight ${(Number(t.amount) - (Number(t.tax) || 0)) >= 0 ? "text-green-500" : "text-red-500"}`}>
                     {(Number(t.amount) - (Number(t.tax) || 0)) >= 0 ? "+" : "-"}₹{Math.abs(Number(t.amount) - (Number(t.tax) || 0)).toFixed(2)}
@@ -206,170 +168,11 @@ export function TransactionTable() {
       </div>
 
       {editingIndex !== null && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-card w-full max-w-md max-h-[85vh] overflow-y-auto p-6 rounded-2xl shadow-xl animate-in fade-in zoom-in duration-200 custom-scrollbar">
-            <h3 className="text-xl font-bold font-heading mb-6">Edit Transaction</h3>
-            <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }} className="space-y-4">
-
-              {/* Other inputs remain same... Adding Rule Checkbox */}
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase">Date</label>
-                <input
-                  type="date"
-                  value={editData.date}
-                  onChange={(e) => setEditData({ ...editData, date: e.target.value })}
-                  className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-sans"
-                  required
-                />
-              </div>
-
-              {/* ... Type, Amount ... */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase">Type</label>
-                  <select
-                    value={editData.type}
-                    onChange={(e) => setEditData({ ...editData, type: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
-                    required
-                  >
-                    <option value="income">Income</option>
-                    <option value="expense">Expense</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase">Amount</label>
-                  <input
-                    type="number"
-                    value={editData.amount}
-                    onChange={(e) => setEditData({ ...editData, amount: e.target.value })}
-                    placeholder="0.00"
-                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase">Tax / Charges</label>
-                <input
-                  type="number"
-                  value={editData.tax || ""}
-                  onChange={(e) => setEditData({ ...editData, tax: e.target.value })}
-                  placeholder="0.00"
-                  className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
-                />
-              </div>
-
-              {/* ... Rest of inputs ... */}
-
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase">Source</label>
-                <input
-                  type="text"
-                  value={editData.source}
-                  onChange={(e) => setEditData({ ...editData, source: e.target.value })}
-                  placeholder="e.g. Salary, Client X"
-                  className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
-                  required
-                />
-              </div>
-
-              {/* Trade Details */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase">Instrument</label>
-                  <input
-                    type="text"
-                    value={editData.instrument || ""}
-                    onChange={(e) => setEditData({ ...editData, instrument: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase">Lot Size</label>
-                  <input
-                    type="text"
-                    value={editData.lotSize || ""}
-                    onChange={(e) => setEditData({ ...editData, lotSize: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase">Buy Price</label>
-                  <input
-                    type="number"
-                    value={editData.buyingPrice || ""}
-                    onChange={(e) => setEditData({ ...editData, buyingPrice: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase">Sell Price</label>
-                  <input
-                    type="number"
-                    value={editData.sellingPrice || ""}
-                    onChange={(e) => setEditData({ ...editData, sellingPrice: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase">Entry Time</label>
-                  <input
-                    type="time"
-                    value={editData.entryTime || ""}
-                    onChange={(e) => setEditData({ ...editData, entryTime: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground uppercase">Exit Time</label>
-                  <input
-                    type="time"
-                    value={editData.exitTime || ""}
-                    onChange={(e) => setEditData({ ...editData, exitTime: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase">Description</label>
-                <textarea
-                  value={editData.description}
-                  onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                  placeholder="Add notes..."
-                  rows="3"
-                  className="w-full p-3 rounded-xl bg-secondary/50 border-transparent focus:border-primary focus:ring-0 transition-all resize-none"
-                ></textarea>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  className="flex-1 px-4 py-3 rounded-xl bg-secondary text-foreground hover:bg-secondary/80 font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-medium shadow-lg shadow-primary/20 transition-all"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <EditTransactionModal
+          transaction={transactions.find(t => t._id === editingIndex)}
+          onSave={handleSaveEdit}
+          onClose={() => setEditingIndex(null)}
+        />
       )}
     </>
   );
