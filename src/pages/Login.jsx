@@ -9,8 +9,9 @@ export function Login() {
   const [password, setPassword] = useState(""); // Default empty
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, googleLogin } = useAuth();
+  const { login, googleLogin, demoLogin } = useAuth();
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL || "https://2money-backend.onrender.com";
 
   const handleGoogleLogin = async () => {
     try {
@@ -20,6 +21,35 @@ export function Login() {
       navigate("/");
     } catch (err) {
       setError("Failed to log in with Google: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    try {
+      setError("");
+      setLoading(true);
+      const userCredential = await demoLogin();
+      const token = await userCredential.user.getIdToken();
+      
+      // Seed dummy data
+      const res = await fetch(`${API_URL}/api/demo/seed`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || errData.message || "Server error while seeding data");
+      }
+      
+      // Force a full page reload so that TransactionContext fetches the newly seeded data
+      window.location.href = "/";
+    } catch (err) {
+      setError("Failed to create demo session: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -125,6 +155,15 @@ export function Login() {
               />
             </svg>
             Continue with Google
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            disabled={loading}
+            className="w-full mt-3 bg-transparent hover:bg-white/5 text-foreground font-medium py-2 rounded-xl border border-dashed border-border transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            {loading ? "Generating Sandbox..." : "Try Live Demo"}
           </button>
 
           <div className="text-center mt-6 text-sm text-muted-foreground">

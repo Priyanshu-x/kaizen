@@ -8,7 +8,8 @@ import {
   signOut,
   updateProfile,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInAnonymously
 } from "firebase/auth";
 
 const AuthContext = createContext();
@@ -57,12 +58,16 @@ export function AuthProvider({ children }) {
     return signInWithPopup(auth, provider);
   };
 
+  const demoLogin = () => {
+    return signInAnonymously(auth);
+  };
+
   const logout = () => {
     return signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, signup, login, googleLogin, logout, loading }}>
+    <AuthContext.Provider value={{ user, signup, login, googleLogin, demoLogin, logout, loading }}>
       {loading ? <LoadingScreen /> : children}
     </AuthContext.Provider>
   );
