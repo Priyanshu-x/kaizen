@@ -38,11 +38,11 @@ A specialized, monochrome web application designed exclusively for tracking trad
 
 1.  Clone the repo
     ```bash
-    git clone https://github.com/Priyanshu-x/income-tracker-frontend
+    git clone https://github.com/Priyanshu-x/kaizen
     ```
 2.  Navigate into the project directory
     ```bash
-    cd income-tracker
+    cd kaizen
     ```
 3.  Install NPM packages
     ```bash
